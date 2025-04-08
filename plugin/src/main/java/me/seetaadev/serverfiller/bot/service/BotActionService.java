@@ -2,7 +2,6 @@ package me.seetaadev.serverfiller.bot.service;
 
 import com.bencodez.votingplugin.VotingPluginHooks;
 import com.bencodez.votingplugin.events.PlayerVoteEvent;
-import com.bencodez.votingplugin.listeners.VotiferEvent;
 import com.bencodez.votingplugin.objects.VoteSite;
 import com.bencodez.votingplugin.user.VotingPluginUser;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
