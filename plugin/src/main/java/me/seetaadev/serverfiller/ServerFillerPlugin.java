@@ -1,6 +1,5 @@
 package me.seetaadev.serverfiller;
 
-import me.seetaadev.serverfiller.bot.responses.ai.AIChatResponder;
 import me.seetaadev.serverfiller.bot.BotFactory;
 import me.seetaadev.serverfiller.bot.personality.PersonalityManager;
 import me.seetaadev.serverfiller.bot.responses.local.ChatResponder;
@@ -26,7 +25,7 @@ public class ServerFillerPlugin extends JavaPlugin {
     private final ChatResponder chatResponder = new ChatResponder(this);
     private final BotActionService botActionService = new BotActionService(this);
     private final BotMessageService botMessageService = new BotMessageService(this);
-    private ExecutorService asyncExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService asyncExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     public void onEnable() {

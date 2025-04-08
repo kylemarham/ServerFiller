@@ -3,7 +3,6 @@ package me.seetaadev.serverfiller.listeners;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
-import me.seetaadev.serverfiller.bot.BotFactory;
 import me.seetaadev.serverfiller.bot.responses.local.ChatResponder;
 import me.seetaadev.serverfiller.messages.MessageHandler;
 import net.kyori.adventure.text.Component;
@@ -18,14 +17,12 @@ public class ChatListener implements Listener {
     private final ServerFillerPlugin plugin;
     private final MessageHandler messageHandler;
     private final ChatResponder chatResponder;
-    private final BotFactory botFactory;
     private final PlainTextComponentSerializer plainTextSerializer = PlainTextComponentSerializer.plainText();
 
     public ChatListener(ServerFillerPlugin plugin) {
         this.plugin = plugin;
         this.messageHandler = plugin.getMessageHandler();
         this.chatResponder = plugin.getChatResponder();
-        this.botFactory = plugin.getBotFactory();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

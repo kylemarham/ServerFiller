@@ -84,7 +84,7 @@ public class BotJoinListener implements Listener {
         if (welcomeBots.size() > maxWelcomes) {
             Collections.shuffle(welcomeBots, rand);
             while (welcomeBots.size() > maxWelcomes) {
-                welcomeBots.remove(welcomeBots.size() - 1);
+                welcomeBots.removeLast();
             }
         }
 
