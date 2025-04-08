@@ -92,7 +92,10 @@ public class BotActionService {
         Random random = new Random();
         VoteSite voteSite = votingPlugin.getMainClass().getVoteSites()
                 .get(random.nextInt(votingPlugin.getMainClass().getVoteSites().size()));
+<<<<<<< HEAD
         if (voteSite == null) return false;
+=======
+>>>>>>> d764fd5 (feat: add random vote)
 
         VotingPluginUser user = votingPlugin.getUserManager().getVotingPluginUser(bot.getUniqueId());
         if (!user.canVoteSite(voteSite)) {
