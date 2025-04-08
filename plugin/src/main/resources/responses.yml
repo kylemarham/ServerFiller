@@ -1,0 +1,24 @@
+hello:
+    keywords:
+        - hello
+        - hey
+        - is anyone there
+    responses:
+        - I'm here, {player_name}!
+        - Hey {playerName}, how's it going?
+        - What's up, {player_name}?
+resource_pack:
+    keywords:
+        - resource pack
+        - pack
+        - texture pack
+    responses:
+        - "You can enable the resource pack in the server settings!"
+        - "Make sure your server resource packs are set to 'Enabled'!"
+shop:
+    keywords:
+        - shop
+        - buy
+        - sell
+    responses:
+        - "Try /shop or check spawn for the main market!"

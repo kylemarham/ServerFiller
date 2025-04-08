@@ -1,0 +1,54 @@
+host:
+    name: "localhost"
+    port: 25565
+
+bots:
+    online:
+        min: 25
+        max: 50
+    timeActions:
+        min: 120 # in seconds
+        max: 1600 # in seconds
+
+chat:
+    welcome:
+        enabled: true
+        chance: 0.7
+        min: 1
+        max: 5
+
+openai:
+    enabled: true
+    apiKey: "your-api-key-here" # Replace with your actual key in https://api.together.xyz/
+    minReplies: 2
+    maxReplies: 5
+    minDelay: 10 # in seconds
+    maxDelay: 60 # in seconds
+
+messages:
+    enabled: true
+    reload: "&cReload config"
+    join: "&aJoin server {bot_name}"
+    firstJoin: "&a{bot_name} joined for the first time!"
+    leave: "&cLeave server {bot_name}"
+    no_permission: "&cYou don't have permission to use this command"
+    spawn: "&aSpawn server {bot_name}"
+    botNotFound: "&cBot {bot_name} not found"
+    despawn: "&cDespawn server {bot_name}"
+    create: "&aCreate server {bot_name}"
+    help:
+        - "&aCommands:"
+        - "&a/serverfiller create <name> <rank> <skillLevel>"
+        - "&a/serverfiller spawn <name>"
+        - "&a/serverfiller despawn <name>"
+        - "&a/serverfiller reload"
+        - "&a/serverfiller help"
+    chat:
+        bot: "%luckperms_prefix% &f%player_name% &8[&7{botSkillLevel}&8]&e: &f{message}"
+        player: "%luckperms_prefix% &f%player_name%&e: &f{message}"
+        welcome_message:
+            - "&fHello, {player_name}!"
+            - "&fWelcome back, {player_name}!"
+        first_message:
+            - "&fWelcome {player_name} to the server!"
+            - "&fHello {player_name}, enjoy your stay!"
