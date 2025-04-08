@@ -30,12 +30,6 @@ public class ChatListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncChatEvent event) {
-        if (botFactory.isBot(event.getPlayer().getUniqueId())) {
-            String message = getOriginalMessage(event.message());
-            event.message(messageHandler.format(message));
-            return;
-        }
-
         boolean enabled = plugin.getConfig().getBoolean("messages.enabled", true);
 
         Player player = event.getPlayer();

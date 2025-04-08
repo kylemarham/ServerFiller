@@ -8,6 +8,7 @@ repositories {
     maven("https://jitpack.io")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://nexus.bencodez.com/repository/maven-public/")
+    maven("https://nexus.scarsz.me/content/groups/public/")
     mavenCentral()
 }
 

@@ -1,5 +1,7 @@
 package me.seetaadev.serverfiller.listeners;
 
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.util.SchedulerUtil;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
@@ -22,7 +24,7 @@ public class BotJoinListener implements Listener {
 
     private final MessageHandler messageHandler;
     private final BotFactory botFactory;
-    private ServerFillerPlugin plugin;
+    private final ServerFillerPlugin plugin;
 
 
     public BotJoinListener(ServerFillerPlugin plugin) {
@@ -104,8 +106,6 @@ public class BotJoinListener implements Listener {
         }
     }
 
-
-
     private void sendBotReply(Bot bot, String replyText) {
         String botFormat = messageHandler.getMessage("chat.bot");
         botFormat = botFormat.replace("{displayName}", bot.getName())
@@ -114,5 +114,16 @@ public class BotJoinListener implements Listener {
         botFormat = PlaceholderAPI.setPlaceholders(bot, botFormat);
         Component botResponse = messageHandler.format(botFormat);
         Bukkit.broadcast(botResponse);
+        sendDiscordMessage(replyText, bot);
+    }
+
+    public void sendDiscordMessage(String message, Bot bot) {
+        SchedulerUtil.runTaskAsynchronously(DiscordSRV.getPlugin(), () -> {
+            DiscordSRV.getPlugin().processChatMessage(
+                    bot,
+                    message,
+                    DiscordSRV.getPlugin().getOptionalChannel("global"),
+                    false, null);
+        });
     }
 }
