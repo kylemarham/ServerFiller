@@ -67,7 +67,7 @@ public class BotBuilder {
                 }
             }
         } catch (Exception ignored) {
-            plugin.getComponentLogger().warn("Failed to load skin for player: " + playerName);
+            plugin.getComponentLogger().warn("Failed to load skin for player: {}", playerName);
         }
     }
 

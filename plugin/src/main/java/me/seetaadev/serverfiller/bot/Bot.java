@@ -89,8 +89,14 @@ public class Bot extends CraftPlayer {
                         }
 
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                            Location target = new Location(Bukkit.getWorld("world"), -410, 32, 313);
-                            teleport(target);
+                            Player bukkitPlayer = Bukkit.getPlayer(getName());
+                            if (bukkitPlayer != null) {
+                                Location target = new Location(Bukkit.getWorld("world"), -410, 32, 313);
+                                bukkitPlayer.teleport(target);
+                            } else {
+                                // Optional: log that the player wasn't found
+                                plugin.getLogger().warning("Player " + getName() + " not found for teleportation!");
+                            }
                         }, 120L); // 1 tick delay
                     });
                 }
