@@ -3,12 +3,14 @@ package me.seetaadev.serverfiller.listeners;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
+import me.seetaadev.serverfiller.bot.BotFactory;
 import me.seetaadev.serverfiller.bot.responses.local.ChatResponder;
 import me.seetaadev.serverfiller.messages.MessageHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 public class ChatListener implements Listener {
@@ -16,16 +18,24 @@ public class ChatListener implements Listener {
     private final ServerFillerPlugin plugin;
     private final MessageHandler messageHandler;
     private final ChatResponder chatResponder;
+    private final BotFactory botFactory;
     private final PlainTextComponentSerializer plainTextSerializer = PlainTextComponentSerializer.plainText();
 
     public ChatListener(ServerFillerPlugin plugin) {
         this.plugin = plugin;
         this.messageHandler = plugin.getMessageHandler();
         this.chatResponder = plugin.getChatResponder();
+        this.botFactory = plugin.getBotFactory();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncChatEvent event) {
+        if (botFactory.isBot(event.getPlayer().getUniqueId())) {
+            String message = getOriginalMessage(event.message());
+            event.message(messageHandler.format(message));
+            return;
+        }
+
         boolean enabled = plugin.getConfig().getBoolean("messages.enabled", true);
 
         Player player = event.getPlayer();

@@ -1,5 +1,6 @@
 package me.seetaadev.serverfiller.bot.responses.local;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
@@ -148,7 +149,8 @@ public class ChatResponder {
                 .replace("{message}", replyText);
         botFormat = PlaceholderAPI.setPlaceholders(bot, botFormat);
         Component botResponse = messageHandler.format(botFormat);
-        Bukkit.broadcast(botResponse);
+
+        bot.chat(botFormat);
         bot.processResponse();
     }
 

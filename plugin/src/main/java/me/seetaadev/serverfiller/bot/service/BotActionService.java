@@ -1,9 +1,15 @@
 package me.seetaadev.serverfiller.bot.service;
 
+import com.bencodez.votingplugin.VotingPluginHooks;
+import com.bencodez.votingplugin.events.PlayerVoteEvent;
+import com.bencodez.votingplugin.listeners.VotiferEvent;
+import com.bencodez.votingplugin.objects.VoteSite;
+import com.bencodez.votingplugin.user.VotingPluginUser;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
 import me.seetaadev.serverfiller.bot.BotFactory;
 import me.seetaadev.serverfiller.config.ConfigFile;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -48,24 +54,53 @@ public class BotActionService {
         task = new BukkitRunnable() {
             @Override
             public void run() {
-                int currentCount = botFactory.onlineBotsCount();
-
-                Bot bot;
-                if (currentCount < minOnlineBots || (currentCount <= maxOnlineBots && random.nextBoolean())) {
-                    bot = botFactory.randomOfflineBot();
-                    if (bot != null)
-                        bot.spawn();
-
-                } else if (currentCount > maxOnlineBots || currentCount >= minOnlineBots) {
-                    bot = botFactory.randomOnlineBot(true);
-                    if (bot != null) bot.despawn();
+                Random rand = new Random();
+                int voteOrJoin = rand.nextInt(2);
+                if (voteOrJoin == 0) {
+                    Bot bot = botFactory.randomOnlineBot(false);
+                    if (bot != null && vote(bot)) {
+                        scheduleNextRun();
+                        return;
+                    }
                 }
 
+                joinOrLeave();
                 scheduleNextRun();
             }
         };
 
         task.runTaskLater(plugin, getRandomDelayTicks());
+    }
+
+    public void joinOrLeave() {
+        int currentCount = botFactory.onlineBotsCount();
+
+        Bot bot;
+        if (currentCount < minOnlineBots || (currentCount <= maxOnlineBots && random.nextBoolean())) {
+            bot = botFactory.randomOfflineBot();
+            if (bot != null)
+                bot.spawn();
+
+        } else if (currentCount > maxOnlineBots || currentCount >= minOnlineBots) {
+            bot = botFactory.randomOnlineBot(true);
+            if (bot != null) bot.despawn();
+        }
+    }
+
+    public boolean vote(Bot bot) {
+        VotingPluginHooks votingPlugin = VotingPluginHooks.getInstance();
+        Random random = new Random();
+        VoteSite voteSite = votingPlugin.getMainClass().getVoteSites()
+                .get(random.nextInt(votingPlugin.getMainClass().getVoteSites().size()));
+
+        VotingPluginUser user = votingPlugin.getUserManager().getVotingPluginUser(bot.getUniqueId());
+        if (!user.canVoteSite(voteSite)) {
+            PlayerVoteEvent voteEvent = new PlayerVoteEvent(voteSite, bot.getName(), voteSite.getServiceSite(), true);
+            Bukkit.getPluginManager().callEvent(voteEvent);
+            return true;
+        }
+
+        return false;
     }
 
     public void stop() {
