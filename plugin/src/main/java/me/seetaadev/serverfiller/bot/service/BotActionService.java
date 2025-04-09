@@ -102,8 +102,15 @@ public class BotActionService {
 
         VotingPluginUser user = votingPlugin.getUserManager().getVotingPluginUser(bot.getUniqueId());
         if (user.canVoteSite(voteSite)) {
-            PlayerVoteEvent voteEvent = new PlayerVoteEvent(voteSite, bot.getName(), voteSite.getServiceSite(), true);
-            Bukkit.getPluginManager().callEvent(voteEvent);
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                PlayerVoteEvent voteEvent = new PlayerVoteEvent(
+                        voteSite,
+                        bot.getName(),
+                        voteSite.getServiceSite(),
+                        true
+                );
+                Bukkit.getPluginManager().callEvent(voteEvent);
+            });
             return true;
         }
 
@@ -132,16 +139,18 @@ public class BotActionService {
                     cancel();
                     return;
                 }
-                // Determine how many bots we need, then spawn a batch (max 5 per tick)
+
                 int missing = minOnlineBots - currentCount;
                 int batchSize = Math.min(missing, 5);
+
                 for (int i = 0; i < batchSize; i++) {
                     Bot bot = botFactory.randomOfflineBot();
                     if (bot != null) {
-                        bot.spawn();
+                        int delay = i * 10;
+                        Bukkit.getScheduler().runTaskLater(plugin, bot::spawn, delay);
                     }
                 }
             }
-        }.runTaskTimer(plugin, 0L, 1L);
+        }.runTaskTimer(plugin, 0L, 20L);
     }
 }

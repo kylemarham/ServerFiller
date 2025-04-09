@@ -5,6 +5,7 @@ import me.seetaadev.serverfiller.bot.loader.BotConfigLoader;
 import me.seetaadev.serverfiller.bot.service.BotStorageService;
 import me.seetaadev.serverfiller.bot.settings.BotSettings;
 import me.seetaadev.serverfiller.config.ConfigFile;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -43,7 +44,7 @@ public class BotFactory {
             plugin.getLogger().warning("Failed to create bots folder");
         }
 
-        parseBotsFolder(botsFolder);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> parseBotsFolder(botsFolder));
     }
 
     private void parseBotsFolder(File botsFolder) {
@@ -76,22 +77,24 @@ public class BotFactory {
 
     private void loadExistingBots(File botsFolder) {
         File[] botFiles = botsFolder.listFiles();
-        if (botFiles != null) {
-            for (File botFile : botFiles) {
-                if (botFile.isFile() && botFile.getName().endsWith(".yml")) {
-                    String name = botFile.getName().replace(".yml", "");
-                    if (botStorageService.isOnline(name)) continue;
+        if (botFiles == null) return;
 
-                    BotSettings settings = configLoader.loadSettings(name, false);
-                    if (settings != null) {
-                        Bot bot = botBuilder.createBot(settings);
-                        botStorageService.addBot(bot);
-                    } else {
-                        plugin.getLogger().warning("Failed to load bot settings from " + name);
-                    }
-                }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            for (File botFile : botFiles) {
+                if (!botFile.isFile() || !botFile.getName().endsWith(".yml")) continue;
+
+                String name = botFile.getName().replace(".yml", "");
+                if (botStorageService.isOnline(name)) continue;
+
+                configLoader.loadSettingsAsync(name, false).thenAccept(settings -> {
+                    if (settings != null)
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            Bot bot = botBuilder.createBot(settings);
+                            botStorageService.addBot(bot);
+                        });
+                });
             }
-        }
+        });
     }
 
     public void reload() {
