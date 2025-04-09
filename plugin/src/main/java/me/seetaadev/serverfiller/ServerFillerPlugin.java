@@ -55,7 +55,7 @@ public class ServerFillerPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (asyncExecutor != null && !asyncExecutor.isShutdown()) {
+        if (!asyncExecutor.isShutdown()) {
             asyncExecutor.shutdownNow();
         }
 

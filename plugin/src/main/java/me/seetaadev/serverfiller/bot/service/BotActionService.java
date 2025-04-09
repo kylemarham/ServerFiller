@@ -92,21 +92,18 @@ public class BotActionService {
 
         int size = votingPlugin.getMainClass().getVoteSites().size();
         if (size == 0) {
-            plugin.getComponentLogger().info("There are no vote sites available");
             return false;
         }
 
         VoteSite voteSite = votingPlugin.getMainClass().getVoteSites().get(random.nextInt(size));
         if (voteSite == null) {
-            plugin.getComponentLogger().info("No vote site found");
             return false;
         }
 
         VotingPluginUser user = votingPlugin.getUserManager().getVotingPluginUser(bot.getUniqueId());
-        if (!user.canVoteSite(voteSite)) {
+        if (user.canVoteSite(voteSite)) {
             PlayerVoteEvent voteEvent = new PlayerVoteEvent(voteSite, bot.getName(), voteSite.getServiceSite(), true);
             Bukkit.getPluginManager().callEvent(voteEvent);
-            plugin.getComponentLogger().warn("{} tried to vote for {}", bot.getName(), voteSite.getServiceSite());
             return true;
         }
 
