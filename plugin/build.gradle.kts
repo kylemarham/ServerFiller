@@ -22,8 +22,11 @@ dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnly("com.bencodez:votingplugin:6.18.3")
+    compileOnly("com.discordsrv:discordsrv:1.28.0")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("org.json:json:20230618")
+
 }
 
 bukkit {
@@ -36,7 +39,8 @@ bukkit {
     authors = listOf("SeeTaaDev")
     description = "${findProperty("plugin-description")}"
     name = projectName
-    depend = listOf("LuckPerms", "PlaceholderAPI")
+    depend = listOf("PlaceholderAPI")
+    softDepend = listOf("VotingPlugin", "DiscordSRV", "LuckPerms")
     commands {
         register("serverfiller") {
             description = "ServerFiller command"

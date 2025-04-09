@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 public class ChatListener implements Listener {
@@ -24,7 +25,7 @@ public class ChatListener implements Listener {
         this.chatResponder = plugin.getChatResponder();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncChatEvent event) {
         boolean enabled = plugin.getConfig().getBoolean("messages.enabled", true);
 

@@ -16,7 +16,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -66,7 +65,7 @@ public class Bot extends CraftPlayer {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (!getHandle().connection.connection.isConnected()) {
                 this.connection = new ConnectionFactory(hostname, port).createConnection();
-                CommonListenerCookie cookie = new CommonListenerCookie(getHandle().getGameProfile(), getHandle().getId(), Bot.CLIENT_INFORMATION, false);
+                CommonListenerCookie cookie = new CommonListenerCookie(getHandle().getGameProfile(), calculateLatency(), Bot.CLIENT_INFORMATION, false);
                 ServerPlayer newServerPlayer = new ServerPlayer(Bot.SERVER, getHandle().serverLevel().getLevel(), getHandle().getGameProfile(), Bot.CLIENT_INFORMATION);
                 newServerPlayer.connection = new ServerGamePacketListenerImpl(Bot.SERVER, connection, getHandle(), cookie);
                 this.entity = newServerPlayer;
@@ -80,7 +79,7 @@ public class Bot extends CraftPlayer {
                     Bukkit.getPluginManager().callEvent(event);
 
                     Bukkit.getScheduler().runTask(plugin, () -> {
-                        Bot.SERVER.getPlayerList().placeNewPlayer(connection, getHandle(), new CommonListenerCookie(getProfile(), entity.getId(), Bot.CLIENT_INFORMATION, false));
+                        Bot.SERVER.getPlayerList().placeNewPlayer(connection, getHandle(), new CommonListenerCookie(getProfile(), calculateLatency(), Bot.CLIENT_INFORMATION, false));
                         Bot.SERVER.getPlayerList().sendAllPlayerInfo(getHandle());
                         spawned = true;
 
@@ -89,14 +88,8 @@ public class Bot extends CraftPlayer {
                         }
 
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                            Player bukkitPlayer = Bukkit.getPlayer(getName());
-                            if (bukkitPlayer != null) {
-                                Location target = new Location(Bukkit.getWorld("world"), -410, 32, 313);
-                                bukkitPlayer.teleport(target);
-                            } else {
-                                // Optional: log that the player wasn't found
-                                plugin.getLogger().warning("Player " + getName() + " not found for teleportation!");
-                            }
+                            Location target = new Location(Bukkit.getWorld("world"), -410, 32, 313);
+                            teleport(target);
                         }, 120L); // 1 tick delay
                     });
                 }
@@ -155,10 +148,6 @@ public class Bot extends CraftPlayer {
 
     public boolean isInCooldown() {
         return inCooldown;
-    }
-
-    public boolean isProcessingResponse() {
-        return processingResponse;
     }
 
     public void processResponse() {

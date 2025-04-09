@@ -6,6 +6,7 @@ import me.seetaadev.serverfiller.config.ConfigFile;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class BotConfigLoader {
 
@@ -25,5 +26,9 @@ public class BotConfigLoader {
         UUID uuid = (uuidString != null) ? UUID.fromString(uuidString) : null;
 
         return new BotSettings(id, rank, skillLevel, uuid);
+    }
+
+    public CompletableFuture<BotSettings> loadSettingsAsync(String id, boolean copy) {
+        return CompletableFuture.supplyAsync(() -> loadSettings(id, copy));
     }
 }

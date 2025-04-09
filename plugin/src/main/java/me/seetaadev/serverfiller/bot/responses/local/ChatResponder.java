@@ -1,5 +1,7 @@
 package me.seetaadev.serverfiller.bot.responses.local;
 
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.util.SchedulerUtil;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
@@ -150,6 +152,17 @@ public class ChatResponder {
         Component botResponse = messageHandler.format(botFormat);
         Bukkit.broadcast(botResponse);
         bot.processResponse();
+        sendDiscordMessage(replyText, bot);
+    }
+
+    public void sendDiscordMessage(String message, Bot bot) {
+        SchedulerUtil.runTaskAsynchronously(DiscordSRV.getPlugin(), () -> {
+            DiscordSRV.getPlugin().processChatMessage(
+                    bot,
+                    message,
+                    DiscordSRV.getPlugin().getOptionalChannel("global"),
+                    false, null);
+        });
     }
 
     public AIChatResponder getAIChatResponder() {
