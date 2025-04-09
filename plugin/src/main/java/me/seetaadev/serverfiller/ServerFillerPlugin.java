@@ -26,6 +26,7 @@ public class ServerFillerPlugin extends JavaPlugin {
     private final BotActionService botActionService = new BotActionService(this);
     private final BotMessageService botMessageService = new BotMessageService(this);
     private final ExecutorService asyncExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService botExecutor = Executors.newFixedThreadPool(10);
 
     @Override
     public void onEnable() {
@@ -59,6 +60,10 @@ public class ServerFillerPlugin extends JavaPlugin {
             asyncExecutor.shutdownNow();
         }
 
+        if (!botExecutor.isShutdown()) {
+            botExecutor.shutdownNow();
+        }
+
         botActionService.stop();
     }
 
@@ -84,5 +89,9 @@ public class ServerFillerPlugin extends JavaPlugin {
 
     public ExecutorService getAsyncExecutor() {
         return asyncExecutor;
+    }
+
+    public ExecutorService getBotExecutor() {
+        return botExecutor;
     }
 }
