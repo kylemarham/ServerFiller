@@ -18,7 +18,6 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -38,13 +37,14 @@ public class Bot extends CraftPlayer {
     public static final MinecraftServer SERVER = ((CraftServer) Bukkit.getServer()).getServer();
     public static final ClientInformation CLIENT_INFORMATION = ClientInformation.createDefault();
 
+
     public Bot(CraftServer craftServer, ServerPlayer entityPlayer, BotSettings settings, String hostname, int port, ServerFillerPlugin plugin) {
         super(craftServer, entityPlayer);
         this.settings = settings;
         this.hostname = hostname;
         this.port = port;
         this.plugin = plugin;
-        this.connection = new ConnectionFactory(hostname, port).createConnection();
+        this.connection = new ConnectionFactory(hostname, port).createConnection(getName(), getUniqueId());
         CommonListenerCookie cookie = new CommonListenerCookie(entityPlayer.getGameProfile(), calculateLatency(), CLIENT_INFORMATION, false);
         entityPlayer.connection = new ServerGamePacketListenerImpl(SERVER, connection, entityPlayer, cookie);
         this.configService = new BotConfigService(plugin, settings);
@@ -64,36 +64,33 @@ public class Bot extends CraftPlayer {
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (!getHandle().connection.connection.isConnected()) {
-                this.connection = new ConnectionFactory(hostname, port).createConnection();
+                this.connection = new ConnectionFactory(hostname, port).createConnection(getName(), getUniqueId());
                 CommonListenerCookie cookie = new CommonListenerCookie(getHandle().getGameProfile(), calculateLatency(), Bot.CLIENT_INFORMATION, false);
                 ServerPlayer newServerPlayer = new ServerPlayer(Bot.SERVER, getHandle().serverLevel().getLevel(), getHandle().getGameProfile(), Bot.CLIENT_INFORMATION);
                 newServerPlayer.connection = new ServerGamePacketListenerImpl(Bot.SERVER, connection, getHandle(), cookie);
                 this.entity = newServerPlayer;
             }
 
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    AsyncPlayerPreLoginEvent event = new AsyncPlayerPreLoginEvent(getName(),
-                            Objects.requireNonNull(getAddress()).getAddress(), getUniqueId(), false);
-                    Bukkit.getPluginManager().callEvent(event);
+            plugin.getBotExecutor().submit(() -> {
+                AsyncPlayerPreLoginEvent event = new AsyncPlayerPreLoginEvent(getName(),
+                        Objects.requireNonNull(getAddress()).getAddress(), getUniqueId(), false);
+                Bukkit.getPluginManager().callEvent(event);
 
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        Bot.SERVER.getPlayerList().placeNewPlayer(connection, getHandle(), new CommonListenerCookie(getProfile(), calculateLatency(), Bot.CLIENT_INFORMATION, false));
-                        Bot.SERVER.getPlayerList().sendAllPlayerInfo(getHandle());
-                        spawned = true;
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    Bot.SERVER.getPlayerList().placeNewPlayer(connection, getHandle(), new CommonListenerCookie(getProfile(), calculateLatency(), Bot.CLIENT_INFORMATION, false));
+                    Bot.SERVER.getPlayerList().sendAllPlayerInfo(getHandle());
+                    spawned = true;
 
-                        if (!hasPlayedBefore()) {
-                            giveRank();
-                        }
+                    if (!hasPlayedBefore()) {
+                        giveRank();
+                    }
 
-                        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                            Location target = new Location(Bukkit.getWorld("world"), -410, 32, 313);
-                            teleport(target);
-                        }, 120L); // 1 tick delay
-                    });
-                }
-            }.runTaskAsynchronously(plugin);
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        Location target = new Location(Bukkit.getWorld("world"), -410, 32, 313);
+                        teleport(target);
+                    }, 120L);
+                });
+            });
         }, 1L);
     }
 

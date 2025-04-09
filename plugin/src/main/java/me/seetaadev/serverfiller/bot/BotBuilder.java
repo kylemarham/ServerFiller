@@ -39,7 +39,7 @@ public class BotBuilder {
     }
 
     public void loadSkin(GameProfile profile, String playerName) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        plugin.getBotExecutor().submit(() -> {
             try {
                 String uuid = getUUIDFromMojang(playerName);
                 if (uuid != null) {
@@ -120,9 +120,7 @@ public class BotBuilder {
     }
 
     private void applySkin(GameProfile profile, Property skin) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            profile.getProperties().put("textures", skin);
-        });
+        Bukkit.getScheduler().runTask(plugin, () -> profile.getProperties().put("textures", skin));
     }
 
     public void setPlugin(ServerFillerPlugin plugin) {
