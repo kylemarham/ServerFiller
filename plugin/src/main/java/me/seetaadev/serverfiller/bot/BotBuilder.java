@@ -29,9 +29,10 @@ public class BotBuilder {
     private int port;
 
     public Bot createBot(BotSettings settings) {
+        boolean skinsEnabled = plugin.getConfig().getBoolean("bots.skinsEnabled", true);
         ServerLevel world = ((CraftWorld) Bukkit.getWorlds().getFirst()).getHandle();
         GameProfile profile = new GameProfile(settings.getUUID(), settings.getName());
-        loadSkin(profile, settings.getName());
+        if(skinsEnabled) { loadSkin(profile, settings.getName()); }
 
         ServerPlayer serverPlayer = new ServerPlayer(Bot.SERVER, world, profile, Bot.CLIENT_INFORMATION);
         Bot bot = new Bot((CraftServer) Bukkit.getServer(), serverPlayer, settings, hostname, port, plugin);

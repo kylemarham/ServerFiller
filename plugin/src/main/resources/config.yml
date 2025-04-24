@@ -4,11 +4,16 @@ host:
 
 bots:
     online:
-        min: 25
-        max: 50
+        min: 5
+        max: 20
     timeActions:
         min: 120 # in seconds
         max: 1600 # in seconds
+    timeVotes:
+        min: 300
+        max: 900
+    votingEnabled: true
+    skinsEnabled: true
 
 chat:
     welcome:
@@ -16,9 +21,10 @@ chat:
         chance: 0.7
         min: 1
         max: 5
+    botWelcomeEnabled: false
 
 openai:
-    enabled: true
+    enabled: false
     apiKey: "your-api-key-here" # Replace with your actual key in https://api.together.xyz/
     minReplies: 2
     maxReplies: 5
@@ -28,9 +34,9 @@ openai:
 messages:
     enabled: true
     reload: "&cReload config"
-    join: "&aJoin server {bot_name}"
-    firstJoin: "&a{bot_name} joined for the first time!"
-    leave: "&cLeave server {bot_name}"
+    join: "&a&l→ &r&a{bot_name}"
+    firstJoin: "&e{bot_name} joined Wavecraft for the first time!"
+    leave: "<color:#ff674f>&l← &r<color:#ff674f>{bot_name}"
     no_permission: "&cYou don't have permission to use this command"
     spawn: "&aSpawn server {bot_name}"
     botNotFound: "&cBot {bot_name} not found"
@@ -44,7 +50,7 @@ messages:
         - "&a/serverfiller reload"
         - "&a/serverfiller help"
     chat:
-        bot: "%luckperms_prefix% &f%player_name% &8[&7{botSkillLevel}&8]&e: &f{message}"
+        bot: "%luckperms_prefix%%player_name% &8[&7{botSkillLevel}&8]&r <color:#666666>&l>&r <color:#efefef>&r{message}"
         player: "%luckperms_prefix% &f%player_name%&e: &f{message}"
         welcome_message:
             - "&fHello, {player_name}!"

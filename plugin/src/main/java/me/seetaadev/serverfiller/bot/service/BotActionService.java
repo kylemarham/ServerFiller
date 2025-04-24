@@ -19,12 +19,17 @@ public class BotActionService {
     private final ServerFillerPlugin plugin;
     private final BotFactory botFactory;
     private final Random random = new Random();
-    private BukkitRunnable task;
+
+    private BukkitRunnable voteTask;
+    private BukkitRunnable joinLeaveTask;
 
     private int minOnlineBots;
     private int maxOnlineBots;
-    private int minTimeBetweenActions;
-    private int maxTimeBetweenActions;
+    private int minTimeBetweenJoinOrLeave;
+    private int maxTimeBetweenJoinOrLeave;
+    private int minTimeBetweenVotes;
+    private int maxTimeBetweenVotes;
+    private boolean votingEnabled;
 
     public BotActionService(ServerFillerPlugin plugin) {
         this.plugin = plugin;
@@ -35,8 +40,13 @@ public class BotActionService {
         FileConfiguration config = new ConfigFile(plugin, null, "config", true).getConfig();
         minOnlineBots = config.getInt("bots.online.min", 25);
         maxOnlineBots = config.getInt("bots.online.max", 50);
-        minTimeBetweenActions = config.getInt("bots.timeActions.min", 10);
-        maxTimeBetweenActions = config.getInt("bots.timeActions.max", 30);
+
+        minTimeBetweenJoinOrLeave = config.getInt("bots.timeActions.min", 10);
+        maxTimeBetweenJoinOrLeave = config.getInt("bots.timeActions.max", 30);
+
+        minTimeBetweenVotes = config.getInt("bots.timeVotes.min", 10);
+        maxTimeBetweenVotes = config.getInt("bots.timeVotes.max", 30);
+        votingEnabled = config.getBoolean("bots.votingEnabled", true);
     }
 
     public void reload() {
@@ -46,29 +56,35 @@ public class BotActionService {
 
     public void start() {
         stop();
-        scheduleNextRun();
+        scheduleJoinLeaveTask();
+        if(votingEnabled) {
+            scheduleVoteTask();
+        }
     }
 
-    private void scheduleNextRun() {
-        task = new BukkitRunnable() {
+    private void scheduleVoteTask() {
+        voteTask = new BukkitRunnable() {
             @Override
             public void run() {
-                Random rand = new Random();
-                int voteOrJoin = rand.nextInt(2);
-                if (voteOrJoin == 0) {
-                    Bot bot = botFactory.randomOnlineBot(false);
-                    if (bot != null && vote(bot)) {
-                        scheduleNextRun();
-                        return;
-                    }
+                Bot bot = botFactory.randomOnlineBot(false);
+                if (bot != null) {
+                    vote(bot);
                 }
-
-                joinOrLeave();
-                scheduleNextRun();
+                scheduleVoteTask(); // Schedule next vote regardless of result
             }
         };
+        voteTask.runTaskLater(plugin, getRandomDelayTicksVote());
+    }
 
-        task.runTaskLater(plugin, getRandomDelayTicks());
+    private void scheduleJoinLeaveTask() {
+        joinLeaveTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                joinOrLeave();
+                scheduleJoinLeaveTask(); // Always schedule next round
+            }
+        };
+        joinLeaveTask.runTaskLater(plugin, getRandomDelayTicksJoinOrLeave());
     }
 
     public void joinOrLeave() {
@@ -118,16 +134,35 @@ public class BotActionService {
     }
 
     public void stop() {
-        if (task != null) {
-            task.cancel();
-            task = null;
+        if (voteTask != null) {
+            voteTask.cancel();
+            voteTask = null;
+        }
+        if (joinLeaveTask != null) {
+            joinLeaveTask.cancel();
+            joinLeaveTask = null;
         }
     }
 
-    private int getRandomDelayTicks() {
-        int secondsRange = maxTimeBetweenActions - minTimeBetweenActions + 1;
-        int seconds = minTimeBetweenActions + random.nextInt(Math.max(secondsRange, 1));
+    private int getRandomDelayTicksJoinOrLeave() {
+        int secondsRange = maxTimeBetweenJoinOrLeave - minTimeBetweenJoinOrLeave + 1;
+        int seconds = minTimeBetweenJoinOrLeave + random.nextInt(Math.max(secondsRange, 1));
         return seconds * 20;
+    }
+
+    private int getRandomDelayTicksVote() {
+        int secondsRange = maxTimeBetweenVotes - minTimeBetweenVotes + 1;
+        int seconds = minTimeBetweenVotes + random.nextInt(Math.max(secondsRange, 1));
+        return seconds * 20;
+    }
+
+    private int getRandomVoteDelayTicks() {
+        // e.g., faster or slower than getRandomDelayTicks()
+        return getRandomDelayTicksVote();
+    }
+
+    private int getRandomJoinLeaveDelayTicks() {
+        return getRandomDelayTicksJoinOrLeave();
     }
 
     public void ensureMinimum() {

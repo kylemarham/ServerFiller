@@ -38,13 +38,15 @@ public class BotJoinListener implements Listener {
         Player player = event.getPlayer();
         Random rand = new Random();
 
+        boolean shouldWeWelcomeBots = plugin.getConfig().getBoolean("chat.botWelcomeEnabled", true);
+
         // If the joining player is a bot, send a join message.
         if (botFactory.isBot(player.getUniqueId())) {
-//            if (player.hasPlayedBefore()) {
-                event.joinMessage(messageHandler.format("join", Map.of("bot_name", player.getName())));
-//            } else {
-//                event.joinMessage(messageHandler.format("firstJoin", Map.of("bot_name", player.getName())));
-//            }
+            event.joinMessage(messageHandler.format("join", Map.of("bot_name", player.getName())));
+
+            if(!shouldWeWelcomeBots) {
+                return;
+            }
         }
 
         boolean enabled = plugin.getConfig().getBoolean("chat.welcome.enabled", true);
