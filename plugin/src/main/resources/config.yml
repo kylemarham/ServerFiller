@@ -14,6 +14,7 @@ bots:
         max: 900
     votingEnabled: true
     skinsEnabled: true
+    chatEnabled: true
 
 chat:
     welcome:

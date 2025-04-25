@@ -27,6 +27,7 @@ public class ChatResponder {
     private final MessageHandler messageHandler;
     private final AIChatResponder AIChatResponder;
     private final Map<String, ResponseCategory> categories = new HashMap<>();
+    private boolean chatEnabled;
 
     public ChatResponder(ServerFillerPlugin plugin) {
         this.plugin = plugin;
@@ -36,15 +37,19 @@ public class ChatResponder {
     }
 
     public void load() {
-        ConfigFile config = new ConfigFile(plugin, null, "responses", true);
-        FileConfiguration fileConfig = config.getConfig();
+        ConfigFile responsesConfigFile = new ConfigFile(plugin, null, "responses", true);
+        FileConfiguration responsesConfig = responsesConfigFile.getConfig();
 
-        for (String categoryName : fileConfig.getKeys(false)) {
-            List<String> keywords = fileConfig.getStringList(categoryName + ".keywords");
-            List<String> responses = fileConfig.getStringList(categoryName + ".responses");
+        for (String categoryName : responsesConfig.getKeys(false)) {
+            List<String> keywords = responsesConfig.getStringList(categoryName + ".keywords");
+            List<String> responses = responsesConfig.getStringList(categoryName + ".responses");
             ResponseCategory category = new ResponseCategory(keywords, responses);
             categories.put(categoryName, category);
         }
+
+        ConfigFile configFile = new ConfigFile(plugin, null, "config", true);
+        FileConfiguration config = configFile.getConfig();
+        chatEnabled = config.getBoolean("bot.chatEnabled", true);
 
         AIChatResponder.load();
     }
@@ -56,12 +61,11 @@ public class ChatResponder {
     }
 
     public void sendResponse(String message, Player player) {
-        Bot bot = matchesBot(message);
-
-        boolean enabled = plugin.getConfig().getBoolean("messages.enabled", true);
-        if(!enabled) {
+        if(!chatEnabled) {
             return;
         }
+
+        Bot bot = matchesBot(message);
 
         for (ResponseCategory category : categories.values()) {
             if (category.matches(message)) {
@@ -100,16 +104,13 @@ public class ChatResponder {
     }
 
     public void sendAIResponse(String message, Bot directBot) {
-
-        boolean enabled = plugin.getConfig().getBoolean("messages.enabled", true);
-        if(!enabled) {
+        if(!chatEnabled) {
             return;
         }
 
         if (AIChatResponder.isAIEnabled() && AIChatResponder.getAPIKey() != null) {
             plugin.getAsyncExecutor().execute(() -> {
                 if (botFactory.isEmpty()) return;
-
                 try {
                     Personality chosenAssistant = plugin.getPersonalityManager().getRandomPersonality();
                     List<String> aiReplies = AIChatResponder.getResponses(message, chosenAssistant.getSystemPrompt(), 5, AIChatResponder.getAPIKey());

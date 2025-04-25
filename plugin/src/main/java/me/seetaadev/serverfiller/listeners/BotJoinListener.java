@@ -5,6 +5,7 @@ import github.scarsz.discordsrv.util.SchedulerUtil;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
+import me.seetaadev.serverfiller.bot.BotBuilder;
 import me.seetaadev.serverfiller.bot.BotFactory;
 import me.seetaadev.serverfiller.messages.MessageHandler;
 import net.kyori.adventure.text.Component;
@@ -25,12 +26,13 @@ public class BotJoinListener implements Listener {
     private final MessageHandler messageHandler;
     private final BotFactory botFactory;
     private final ServerFillerPlugin plugin;
-
+    private final BotBuilder botBuilder;
 
     public BotJoinListener(ServerFillerPlugin plugin) {
         this.plugin = plugin; // Assign the plugin instance
         this.botFactory = plugin.getBotFactory();
         this.messageHandler = plugin.getMessageHandler();
+        this.botBuilder = botFactory.botBuilder();
     }
 
     @EventHandler
@@ -38,22 +40,21 @@ public class BotJoinListener implements Listener {
         Player player = event.getPlayer();
         Random rand = new Random();
 
-        boolean shouldWeWelcomeBots = plugin.getConfig().getBoolean("chat.botWelcomeEnabled", true);
-
         // If the joining player is a bot, send a join message.
+
         if (botFactory.isBot(player.getUniqueId())) {
             event.joinMessage(messageHandler.format("join", Map.of("bot_name", player.getName())));
 
-            if(!shouldWeWelcomeBots) {
+            if(!botBuilder.isShouldWeWelcomeBots()) {
                 return;
             }
         }
 
-        boolean enabled = plugin.getConfig().getBoolean("chat.welcome.enabled", true);
-        double welcomeChance = plugin.getConfig().getDouble("chat.welcome.chance", 0.2);
+        boolean enabled = botBuilder.isChatWelcomeEnabled();
+        double welcomeChance = botBuilder.getWelcomeChance();
 
-        int minWelcomes = plugin.getConfig().getInt("chat.welcome.min", 1);
-        int maxWelcomes = plugin.getConfig().getInt("chat.welcome.max", 5);
+        int minWelcomes = botBuilder.getWelcomeMin();
+        int maxWelcomes = botBuilder.getWelcomeMax();
 
         // Get all online bots from the botFactory.
         List<Bot> onlineBots = botFactory.getOnlineBots();

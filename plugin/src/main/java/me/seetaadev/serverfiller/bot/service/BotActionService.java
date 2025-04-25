@@ -102,18 +102,18 @@ public class BotActionService {
         }
     }
 
-    public boolean vote(Bot bot) {
+    public void vote(Bot bot) {
         VotingPluginHooks votingPlugin = VotingPluginHooks.getInstance();
         Random random = new Random();
 
         int size = votingPlugin.getMainClass().getVoteSites().size();
         if (size == 0) {
-            return false;
+            return;
         }
 
         VoteSite voteSite = votingPlugin.getMainClass().getVoteSites().get(random.nextInt(size));
         if (voteSite == null) {
-            return false;
+            return;
         }
 
         VotingPluginUser user = votingPlugin.getUserManager().getVotingPluginUser(bot.getUniqueId());
@@ -127,10 +127,8 @@ public class BotActionService {
                 );
                 Bukkit.getPluginManager().callEvent(voteEvent);
             });
-            return true;
         }
 
-        return false;
     }
 
     public void stop() {
