@@ -77,7 +77,10 @@ public class Bot extends CraftPlayer {
                     Bot.SERVER.getPlayerList().sendAllPlayerInfo(getHandle());
                     spawned = true;
 
-                    if (!settings.hasPlayedBefore()) plugin.getHookManager().giveRank(getName(), settings.getRank());
+                    if (!settings.hasPlayedBefore()) {
+                        plugin.getHookManager().giveRank(getName(), settings.getRank());
+                        settings.changePlayedBefore(true);
+                    }
 
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         Location target = new Location(Bukkit.getWorld("world"), -410, 32, 313);

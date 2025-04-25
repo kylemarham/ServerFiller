@@ -10,9 +10,9 @@ import org.bukkit.Bukkit;
 public class HookManager {
 
     private final ServerFillerPlugin plugin;
-    private DiscordSRVHook discordSRVHook;
-    private LuckPermsHook luckPermsHook;
-    private VotingHook votingHook;
+    private DiscordSRVHook discordSRVHook = null;
+    private LuckPermsHook luckPermsHook = null;
+    private VotingHook votingHook = null;
 
     public HookManager(ServerFillerPlugin plugin) {
         this.plugin = plugin;
@@ -21,14 +21,17 @@ public class HookManager {
     public void init() {
         if (Bukkit.getPluginManager().isPluginEnabled("DiscordSRV")) {
             discordSRVHook = new DiscordSRVHook();
+            plugin.getComponentLogger().info("DiscordSRV Hook enabled");
         }
 
         if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
             luckPermsHook = new LuckPermsHook();
+            plugin.getComponentLogger().info("LuckPerms Hook enabled");
         }
 
         if (Bukkit.getPluginManager().isPluginEnabled("VotingPlugin")) {
             votingHook = new VotingHook(plugin);
+            plugin.getComponentLogger().info("VotingPlugin Hook enabled");
         }
     }
 

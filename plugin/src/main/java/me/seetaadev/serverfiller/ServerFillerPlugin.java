@@ -13,6 +13,7 @@ import me.seetaadev.serverfiller.listeners.ChatListener;
 import me.seetaadev.serverfiller.messages.MessageHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -28,7 +29,7 @@ public class ServerFillerPlugin extends JavaPlugin {
     private final BotMessageService botMessageService = new BotMessageService(this);
     private final ExecutorService asyncExecutor = Executors.newSingleThreadExecutor();
     private final ExecutorService botExecutor = Executors.newFixedThreadPool(10);
-    private final HookManager hookManager = new HookManager();
+    private final HookManager hookManager = new HookManager(this);
 
     @Override
     public void onEnable() {
@@ -38,14 +39,20 @@ public class ServerFillerPlugin extends JavaPlugin {
         personalityManager.load();
         chatResponder.load();
         botActionService.load();
-        botActionService.start();
-        botActionService.ensureMinimum();
-        hookManager.init();
 
         Bukkit.getPluginManager().registerEvents(new BotJoinListener(this), this);
         Bukkit.getPluginManager().registerEvents(new BotLeaveListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ChatListener(this), this);
         Objects.requireNonNull(getCommand("serverfiller")).setExecutor(new MainCommand(this));
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                hookManager.init();
+                botActionService.start();
+                botActionService.ensureMinimum();
+            }
+        }.runTaskLaterAsynchronously(this, 20L * 3);
     }
 
     public void reload() {

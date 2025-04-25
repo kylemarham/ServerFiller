@@ -1,12 +1,11 @@
 package me.seetaadev.serverfiller.listeners;
 
-import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.util.SchedulerUtil;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
 import me.seetaadev.serverfiller.bot.BotBuilder;
 import me.seetaadev.serverfiller.bot.BotFactory;
+import me.seetaadev.serverfiller.hooks.HookManager;
 import me.seetaadev.serverfiller.messages.MessageHandler;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -27,12 +26,14 @@ public class BotJoinListener implements Listener {
     private final BotFactory botFactory;
     private final ServerFillerPlugin plugin;
     private final BotBuilder botBuilder;
+    private final HookManager hook;
 
     public BotJoinListener(ServerFillerPlugin plugin) {
         this.plugin = plugin; // Assign the plugin instance
         this.botFactory = plugin.getBotFactory();
         this.messageHandler = plugin.getMessageHandler();
         this.botBuilder = botFactory.botBuilder();
+        this.hook = plugin.getHookManager();
     }
 
     @EventHandler
@@ -117,16 +118,6 @@ public class BotJoinListener implements Listener {
         botFormat = PlaceholderAPI.setPlaceholders(bot, botFormat);
         Component botResponse = messageHandler.format(botFormat);
         Bukkit.broadcast(botResponse);
-        sendDiscordMessage(replyText, bot);
-    }
-
-    public void sendDiscordMessage(String message, Bot bot) {
-        SchedulerUtil.runTaskAsynchronously(DiscordSRV.getPlugin(), () -> {
-            DiscordSRV.getPlugin().processChatMessage(
-                    bot,
-                    message,
-                    DiscordSRV.getPlugin().getOptionalChannel("global"),
-                    false, null);
-        });
+        hook.sendDiscordMessage(replyText, bot);
     }
 }

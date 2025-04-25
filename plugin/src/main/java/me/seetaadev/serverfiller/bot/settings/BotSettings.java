@@ -9,7 +9,7 @@ public class BotSettings {
     private final String rank;
     private final int skillLevel;
     private final UUID uuid;
-    private final boolean hasPlayedBefore;
+    private boolean hasPlayedBefore;
 
     public BotSettings (String name, String rank, int skillLevel, UUID uuid, boolean hasPlayedBefore) {
         this.name = name;
@@ -43,4 +43,7 @@ public class BotSettings {
         return hasPlayedBefore;
     }
 
+    public void changePlayedBefore(boolean hasPlayedBefore) {
+        this.hasPlayedBefore = hasPlayedBefore;
+    }
 }
