@@ -7,11 +7,11 @@ import com.bencodez.votingplugin.user.VotingPluginUser;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
 import me.seetaadev.serverfiller.bot.BotFactory;
-import me.seetaadev.serverfiller.config.ConfigFile;
+import me.seetaadev.serverfiller.bot.settings.BotActionSettings;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.List;
 import java.util.Random;
 
 public class BotActionService {
@@ -23,13 +23,7 @@ public class BotActionService {
     private BukkitRunnable voteTask;
     private BukkitRunnable joinLeaveTask;
 
-    private int minOnlineBots;
-    private int maxOnlineBots;
-    private int minTimeBetweenJoinOrLeave;
-    private int maxTimeBetweenJoinOrLeave;
-    private int minTimeBetweenVotes;
-    private int maxTimeBetweenVotes;
-    private boolean votingEnabled;
+    private BotActionSettings config;
 
     public BotActionService(ServerFillerPlugin plugin) {
         this.plugin = plugin;
@@ -37,16 +31,7 @@ public class BotActionService {
     }
 
     public void load() {
-        FileConfiguration config = new ConfigFile(plugin, null, "config", true).getConfig();
-        minOnlineBots = config.getInt("bots.online.min", 25);
-        maxOnlineBots = config.getInt("bots.online.max", 50);
-
-        minTimeBetweenJoinOrLeave = config.getInt("bots.timeActions.min", 10);
-        maxTimeBetweenJoinOrLeave = config.getInt("bots.timeActions.max", 30);
-
-        minTimeBetweenVotes = config.getInt("bots.timeVotes.min", 10);
-        maxTimeBetweenVotes = config.getInt("bots.timeVotes.max", 30);
-        votingEnabled = config.getBoolean("bots.votingEnabled", true);
+        this.config = new BotActionSettings(plugin);
     }
 
     public void reload() {
@@ -57,78 +42,9 @@ public class BotActionService {
     public void start() {
         stop();
         scheduleJoinLeaveTask();
-        if(votingEnabled) {
+        if (config.isVotingEnabled()) {
             scheduleVoteTask();
         }
-    }
-
-    private void scheduleVoteTask() {
-        voteTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                Bot bot = botFactory.randomOnlineBot(false);
-                if (bot != null) {
-                    vote(bot);
-                }
-                scheduleVoteTask(); // Schedule next vote regardless of result
-            }
-        };
-        voteTask.runTaskLater(plugin, getRandomDelayTicksVote());
-    }
-
-    private void scheduleJoinLeaveTask() {
-        joinLeaveTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                joinOrLeave();
-                scheduleJoinLeaveTask(); // Always schedule next round
-            }
-        };
-        joinLeaveTask.runTaskLater(plugin, getRandomDelayTicksJoinOrLeave());
-    }
-
-    public void joinOrLeave() {
-        int currentCount = botFactory.onlineBotsCount();
-
-        Bot bot;
-        if (currentCount < minOnlineBots || (currentCount <= maxOnlineBots && random.nextBoolean())) {
-            bot = botFactory.randomOfflineBot();
-            if (bot != null)
-                bot.spawn();
-
-        } else if (currentCount > maxOnlineBots || currentCount >= minOnlineBots) {
-            bot = botFactory.randomOnlineBot(true);
-            if (bot != null) bot.despawn();
-        }
-    }
-
-    public void vote(Bot bot) {
-        VotingPluginHooks votingPlugin = VotingPluginHooks.getInstance();
-        Random random = new Random();
-
-        int size = votingPlugin.getMainClass().getVoteSites().size();
-        if (size == 0) {
-            return;
-        }
-
-        VoteSite voteSite = votingPlugin.getMainClass().getVoteSites().get(random.nextInt(size));
-        if (voteSite == null) {
-            return;
-        }
-
-        VotingPluginUser user = votingPlugin.getUserManager().getVotingPluginUser(bot.getUniqueId());
-        if (user.canVoteSite(voteSite)) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                PlayerVoteEvent voteEvent = new PlayerVoteEvent(
-                        voteSite,
-                        bot.getName(),
-                        voteSite.getServiceSite(),
-                        true
-                );
-                Bukkit.getPluginManager().callEvent(voteEvent);
-            });
-        }
-
     }
 
     public void stop() {
@@ -142,48 +58,95 @@ public class BotActionService {
         }
     }
 
-    private int getRandomDelayTicksJoinOrLeave() {
-        int secondsRange = maxTimeBetweenJoinOrLeave - minTimeBetweenJoinOrLeave + 1;
-        int seconds = minTimeBetweenJoinOrLeave + random.nextInt(Math.max(secondsRange, 1));
-        return seconds * 20;
-    }
-
-    private int getRandomDelayTicksVote() {
-        int secondsRange = maxTimeBetweenVotes - minTimeBetweenVotes + 1;
-        int seconds = minTimeBetweenVotes + random.nextInt(Math.max(secondsRange, 1));
-        return seconds * 20;
-    }
-
-    private int getRandomVoteDelayTicks() {
-        // e.g., faster or slower than getRandomDelayTicks()
-        return getRandomDelayTicksVote();
-    }
-
-    private int getRandomJoinLeaveDelayTicks() {
-        return getRandomDelayTicksJoinOrLeave();
-    }
-
     public void ensureMinimum() {
         new BukkitRunnable() {
             @Override
             public void run() {
-                int currentCount = botFactory.onlineBotsCount();
-                if (currentCount >= minOnlineBots) {
+                int current = botFactory.onlineBotsCount();
+                if (current >= config.getMinOnlineBots()) {
                     cancel();
                     return;
                 }
 
-                int missing = minOnlineBots - currentCount;
+                int missing = config.getMinOnlineBots() - current;
                 int batchSize = Math.min(missing, 5);
 
                 for (int i = 0; i < batchSize; i++) {
                     Bot bot = botFactory.randomOfflineBot();
                     if (bot != null) {
-                        int delay = i * 10;
-                        Bukkit.getScheduler().runTaskLater(plugin, bot::spawn, delay);
+                        Bukkit.getScheduler().runTaskLater(plugin, bot::spawn, i * 10L);
                     }
                 }
             }
         }.runTaskTimer(plugin, 0L, 20L);
+    }
+
+    private void scheduleJoinLeaveTask() {
+        joinLeaveTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                joinOrLeave();
+                scheduleJoinLeaveTask();
+            }
+        };
+        joinLeaveTask.runTaskLater(plugin, getRandomDelayTicks(config.getMinTimeBetweenJoinOrLeave(), config.getMaxTimeBetweenJoinOrLeave()));
+    }
+
+    private void scheduleVoteTask() {
+        voteTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                Bot bot = botFactory.randomOnlineBot(false);
+                if (bot != null) {
+                    vote(bot);
+                }
+                scheduleVoteTask();
+            }
+        };
+        voteTask.runTaskLater(plugin, getRandomDelayTicks(config.getMinTimeBetweenVotes(), config.getMaxTimeBetweenVotes()));
+    }
+
+    private void joinOrLeave() {
+        int currentCount = botFactory.onlineBotsCount();
+        Bot bot;
+
+        boolean shouldJoin = currentCount < config.getMinOnlineBots() ||
+                (currentCount <= config.getMaxOnlineBots() && random.nextBoolean());
+
+        if (shouldJoin) {
+            bot = botFactory.randomOfflineBot();
+            if (bot != null) bot.spawn();
+        } else {
+            bot = botFactory.randomOnlineBot(true);
+            if (bot != null) bot.despawn();
+        }
+    }
+
+    private void vote(Bot bot) {
+        VotingPluginHooks votingPlugin = VotingPluginHooks.getInstance();
+        List<VoteSite> voteSites = votingPlugin.getMainClass().getVoteSites();
+
+        if (voteSites.isEmpty()) return;
+
+        VoteSite voteSite = voteSites.get(random.nextInt(voteSites.size()));
+        if (voteSite == null) return;
+
+        VotingPluginUser user = votingPlugin.getUserManager().getVotingPluginUser(bot.getUniqueId());
+        if (!user.canVoteSite(voteSite)) return;
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            PlayerVoteEvent event = new PlayerVoteEvent(
+                    voteSite,
+                    bot.getName(),
+                    voteSite.getServiceSite(),
+                    true
+            );
+            Bukkit.getPluginManager().callEvent(event);
+        });
+    }
+
+    private int getRandomDelayTicks(int min, int max) {
+        int range = Math.max(max - min + 1, 1);
+        return (min + random.nextInt(range)) * 20;
     }
 }

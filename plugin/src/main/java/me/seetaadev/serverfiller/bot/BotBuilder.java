@@ -2,7 +2,7 @@ package me.seetaadev.serverfiller.bot;
 
 import com.mojang.authlib.GameProfile;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
-import me.seetaadev.serverfiller.bot.service.SkinService;
+import me.seetaadev.serverfiller.bot.service.BotSkinService;
 import me.seetaadev.serverfiller.bot.settings.BotSettings;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,17 +22,17 @@ public class BotBuilder {
     private int welcomeMax;
 
     private final ServerFillerPlugin plugin;
-    private final SkinService skinService;
+    private final BotSkinService botSkinService;
 
     public BotBuilder(ServerFillerPlugin plugin) {
         this.plugin = plugin;
-        skinService = new SkinService(plugin);
+        botSkinService = new BotSkinService(plugin);
     }
 
     public Bot createBot(BotSettings settings) {
         ServerLevel world = ((CraftWorld) Bukkit.getWorlds().getFirst()).getHandle();
         GameProfile profile = new GameProfile(settings.getUUID(), settings.getName());
-        if (skinsEnabled) skinService.loadSkin(profile, settings.getName());
+        if (skinsEnabled) botSkinService.loadSkin(profile, settings.getName());
 
         ServerPlayer serverPlayer = new ServerPlayer(Bot.SERVER, world, profile, Bot.CLIENT_INFORMATION);
         Bot bot = new Bot((CraftServer) Bukkit.getServer(), serverPlayer, settings, hostname, port, plugin);

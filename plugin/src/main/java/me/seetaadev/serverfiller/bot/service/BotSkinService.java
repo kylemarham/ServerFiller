@@ -18,12 +18,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 
-public class SkinService {
+public class BotSkinService {
 
     private final ServerFillerPlugin plugin;
     private final SkinCache cache;
 
-    public SkinService(ServerFillerPlugin plugin) {
+    public BotSkinService(ServerFillerPlugin plugin) {
         this.plugin = plugin;
         this.cache = new SkinCache();
     }
