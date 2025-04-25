@@ -79,6 +79,7 @@ public class BotFactory {
             FileConfiguration botConfig = botConfigFile.getConfig();
             botConfig.set("rank", rank);
             botConfig.set("skillLevel", skillLevel);
+            botConfig.set("hasPlayedBefore", false);
             botConfigFile.save();
         }
 

@@ -9,16 +9,18 @@ public class BotSettings {
     private final String rank;
     private final int skillLevel;
     private final UUID uuid;
+    private final boolean hasPlayedBefore;
 
-    public BotSettings (String name, String rank, int skillLevel, UUID uuid) {
+    public BotSettings (String name, String rank, int skillLevel, UUID uuid, boolean hasPlayedBefore) {
         this.name = name;
         this.rank = rank;
         this.skillLevel = skillLevel;
         this.uuid = Objects.requireNonNullElseGet(uuid, UUID::randomUUID);
+        this.hasPlayedBefore = hasPlayedBefore;
     }
 
     public BotSettings (String name, String rank, int skillLevel) {
-        this(name, rank, skillLevel, UUID.randomUUID());
+        this(name, rank, skillLevel, UUID.randomUUID(), false);
     }
 
     public String getName() {
@@ -35,6 +37,10 @@ public class BotSettings {
 
     public UUID getUUID() {
         return uuid;
+    }
+
+    public boolean hasPlayedBefore() {
+        return hasPlayedBefore;
     }
 
 }

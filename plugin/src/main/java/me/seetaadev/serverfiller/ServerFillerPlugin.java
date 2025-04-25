@@ -6,6 +6,7 @@ import me.seetaadev.serverfiller.bot.responses.local.ChatResponder;
 import me.seetaadev.serverfiller.bot.service.BotActionService;
 import me.seetaadev.serverfiller.bot.service.BotMessageService;
 import me.seetaadev.serverfiller.commands.MainCommand;
+import me.seetaadev.serverfiller.hooks.HookManager;
 import me.seetaadev.serverfiller.listeners.BotJoinListener;
 import me.seetaadev.serverfiller.listeners.BotLeaveListener;
 import me.seetaadev.serverfiller.listeners.ChatListener;
@@ -27,6 +28,7 @@ public class ServerFillerPlugin extends JavaPlugin {
     private final BotMessageService botMessageService = new BotMessageService(this);
     private final ExecutorService asyncExecutor = Executors.newSingleThreadExecutor();
     private final ExecutorService botExecutor = Executors.newFixedThreadPool(10);
+    private final HookManager hookManager = new HookManager();
 
     @Override
     public void onEnable() {
@@ -38,6 +40,7 @@ public class ServerFillerPlugin extends JavaPlugin {
         botActionService.load();
         botActionService.start();
         botActionService.ensureMinimum();
+        hookManager.init();
 
         Bukkit.getPluginManager().registerEvents(new BotJoinListener(this), this);
         Bukkit.getPluginManager().registerEvents(new BotLeaveListener(this), this);
@@ -93,5 +96,9 @@ public class ServerFillerPlugin extends JavaPlugin {
 
     public ExecutorService getBotExecutor() {
         return botExecutor;
+    }
+
+    public HookManager getHookManager() {
+        return hookManager;
     }
 }

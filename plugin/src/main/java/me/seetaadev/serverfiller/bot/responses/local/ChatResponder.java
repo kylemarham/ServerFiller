@@ -1,7 +1,5 @@
 package me.seetaadev.serverfiller.bot.responses.local;
 
-import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.util.SchedulerUtil;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
@@ -9,6 +7,7 @@ import me.seetaadev.serverfiller.bot.BotFactory;
 import me.seetaadev.serverfiller.bot.personality.Personality;
 import me.seetaadev.serverfiller.bot.responses.ai.AIChatResponder;
 import me.seetaadev.serverfiller.config.ConfigFile;
+import me.seetaadev.serverfiller.hooks.HookManager;
 import me.seetaadev.serverfiller.messages.MessageHandler;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -28,12 +27,14 @@ public class ChatResponder {
     private final AIChatResponder AIChatResponder;
     private final Map<String, ResponseCategory> categories = new HashMap<>();
     private boolean chatEnabled;
+    private final HookManager hook;
 
     public ChatResponder(ServerFillerPlugin plugin) {
         this.plugin = plugin;
         this.botFactory = plugin.getBotFactory();
         this.messageHandler = plugin.getMessageHandler();
         this.AIChatResponder = new AIChatResponder(plugin);
+        this.hook = plugin.getHookManager();
     }
 
     public void load() {
@@ -50,7 +51,6 @@ public class ChatResponder {
         ConfigFile configFile = new ConfigFile(plugin, null, "config", true);
         FileConfiguration config = configFile.getConfig();
         chatEnabled = config.getBoolean("bot.chatEnabled", true);
-
         AIChatResponder.load();
     }
 
@@ -153,18 +153,10 @@ public class ChatResponder {
         Component botResponse = messageHandler.format(botFormat);
         Bukkit.broadcast(botResponse);
         bot.processResponse();
-        sendDiscordMessage(replyText, bot);
+        hook.sendDiscordMessage(replyText, bot);
     }
 
-    public void sendDiscordMessage(String message, Bot bot) {
-        SchedulerUtil.runTaskAsynchronously(DiscordSRV.getPlugin(), () -> {
-            DiscordSRV.getPlugin().processChatMessage(
-                    bot,
-                    message,
-                    DiscordSRV.getPlugin().getOptionalChannel("global"),
-                    false, null);
-        });
-    }
+
 
     public AIChatResponder getAIChatResponder() {
         return AIChatResponder;

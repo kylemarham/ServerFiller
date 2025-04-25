@@ -53,10 +53,6 @@ public class Bot extends CraftPlayer {
         this.processingResponse = false;
     }
 
-    public int calculateLatency() {
-        return ThreadLocalRandom.current().nextInt(10, 200);
-    }
-
     public void spawn() {
         if (spawned || existsPlayerWithName(settings.getName())) {
             return;
@@ -81,9 +77,7 @@ public class Bot extends CraftPlayer {
                     Bot.SERVER.getPlayerList().sendAllPlayerInfo(getHandle());
                     spawned = true;
 
-                    if (!hasPlayedBefore()) {
-                        giveRank();
-                    }
+                    if (!settings.hasPlayedBefore()) plugin.getHookManager().giveRank(getName(), settings.getRank());
 
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         Location target = new Location(Bukkit.getWorld("world"), -410, 32, 313);
@@ -92,15 +86,6 @@ public class Bot extends CraftPlayer {
                 });
             });
         }, 1L);
-    }
-
-    public boolean existsPlayerWithName(String name) {
-        return Bukkit.getPlayer(name) != null;
-    }
-
-    public void giveRank() {
-        String command = "lp user " + getName() + " parent set " + settings.getRank();
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 
     public void despawn() {
@@ -119,6 +104,22 @@ public class Bot extends CraftPlayer {
         return this;
     }
 
+    public int calculateLatency() {
+        return ThreadLocalRandom.current().nextInt(10, 200);
+    }
+
+    public void startCooldown() {
+        this.inCooldown = true;
+        AIChatResponder AIChatResponder = plugin.getChatResponder().getAIChatResponder();
+        int delaySeconds = ThreadLocalRandom.current().nextInt(AIChatResponder.getMinDelay(), AIChatResponder.getMaxDelay() + 1);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> this.inCooldown = false, 20L * delaySeconds);
+    }
+
+    public boolean existsPlayerWithName(String name) {
+        return Bukkit.getPlayer(name) != null;
+    }
+
     public boolean isSpawned() {
         return spawned;
     }
@@ -133,14 +134,6 @@ public class Bot extends CraftPlayer {
 
     public BotSettings getSettings() {
         return settings;
-    }
-
-    public void startCooldown() {
-        this.inCooldown = true;
-        AIChatResponder AIChatResponder = plugin.getChatResponder().getAIChatResponder();
-        int delaySeconds = ThreadLocalRandom.current().nextInt(AIChatResponder.getMinDelay(), AIChatResponder.getMaxDelay() + 1);
-
-        Bukkit.getScheduler().runTaskLater(plugin, () -> this.inCooldown = false, 20L * delaySeconds);
     }
 
     public boolean isInCooldown() {

@@ -21,11 +21,12 @@ public class BotConfigLoader {
         FileConfiguration config = configFile.getConfig();
         String rank = config.getString("rank");
         int skillLevel = config.getInt("skillLevel");
+        boolean hasPlayedBefore = config.getBoolean("hasPlayedBefore", false);
 
         String uuidString = config.getString("uuid", null);
         UUID uuid = (uuidString != null) ? UUID.fromString(uuidString) : null;
 
-        return new BotSettings(id, rank, skillLevel, uuid);
+        return new BotSettings(id, rank, skillLevel, uuid, hasPlayedBefore);
     }
 
     public CompletableFuture<BotSettings> loadSettingsAsync(String id, boolean copy) {
