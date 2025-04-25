@@ -44,6 +44,7 @@ public class ServerFillerPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new BotLeaveListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ChatListener(this), this);
         Objects.requireNonNull(getCommand("serverfiller")).setExecutor(new MainCommand(this));
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
         new BukkitRunnable() {
             @Override

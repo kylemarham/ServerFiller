@@ -20,6 +20,7 @@ public class BotBuilder {
     private double welcomeChance;
     private int welcomeMin;
     private int welcomeMax;
+    private boolean proxyEnabled;
 
     private final ServerFillerPlugin plugin;
     private final BotSkinService botSkinService;
@@ -89,5 +90,13 @@ public class BotBuilder {
 
     public int getWelcomeMax() {
         return welcomeMax;
+    }
+
+    public void setProxyEnabled(boolean proxyEnabled) {
+        this.proxyEnabled = proxyEnabled;
+    }
+
+    public boolean isProxyEnabled() {
+        return proxyEnabled;
     }
 }

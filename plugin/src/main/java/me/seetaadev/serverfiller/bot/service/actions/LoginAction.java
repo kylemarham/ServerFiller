@@ -3,7 +3,7 @@ package me.seetaadev.serverfiller.bot.service.actions;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
 import me.seetaadev.serverfiller.bot.BotFactory;
-import me.seetaadev.serverfiller.bot.settings.BotActionSettings;
+import me.seetaadev.serverfiller.bot.service.BotActionService;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -12,12 +12,12 @@ public class LoginAction implements Action {
     private BukkitRunnable joinLeaveTask;
     private final ServerFillerPlugin plugin;
     private final BotFactory botFactory;
-    private final BotActionSettings config;
+    private final BotActionService botActionService;
 
-    public LoginAction(ServerFillerPlugin plugin, BotActionSettings config) {
+    public LoginAction(ServerFillerPlugin plugin, BotActionService botActionService) {
         this.plugin = plugin;
         this.botFactory = plugin.getBotFactory();
-        this.config = config;
+        this.botActionService = botActionService;
     }
 
     @Override
@@ -29,15 +29,16 @@ public class LoginAction implements Action {
                 start();
             }
         };
-        joinLeaveTask.runTaskLater(plugin, getRandomDelayTicks(config.getMinTimeBetweenJoinOrLeave(), config.getMaxTimeBetweenJoinOrLeave()));
+        joinLeaveTask.runTaskLater(plugin, getRandomDelayTicks(botActionService.getConfig().getMinTimeBetweenJoinOrLeave(),
+                botActionService.getConfig().getMaxTimeBetweenJoinOrLeave()));
     }
 
     private void joinOrLeave() {
         int currentCount = botFactory.onlineBotsCount();
         Bot bot;
 
-        boolean shouldJoin = currentCount < config.getMinOnlineBots() ||
-                (currentCount <= config.getMaxOnlineBots() && rand.nextBoolean());
+        boolean shouldJoin = currentCount < botActionService.getConfig().getMinOnlineBots() ||
+                (currentCount <= botActionService.getConfig().getMaxOnlineBots() && rand.nextBoolean());
 
         if (shouldJoin) {
             bot = botFactory.randomOfflineBot();
@@ -61,12 +62,12 @@ public class LoginAction implements Action {
             @Override
             public void run() {
                 int current = botFactory.onlineBotsCount();
-                if (current >= config.getMinOnlineBots()) {
+                if (current >= botActionService.getConfig().getMinOnlineBots()) {
                     cancel();
                     return;
                 }
 
-                int missing = config.getMinOnlineBots() - current;
+                int missing = botActionService.getConfig().getMinOnlineBots() - current;
                 int batchSize = Math.min(missing, 5);
 
                 for (int i = 0; i < batchSize; i++) {

@@ -5,15 +5,12 @@ import me.seetaadev.serverfiller.bot.service.actions.Action;
 import me.seetaadev.serverfiller.bot.service.actions.LoginAction;
 import me.seetaadev.serverfiller.bot.service.actions.VoteAction;
 import me.seetaadev.serverfiller.bot.settings.BotActionSettings;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Set;
 
 public class BotActionService {
 
     private final ServerFillerPlugin plugin;
-
-    private BukkitRunnable voteTask;
     private BotActionSettings config;
     private final Set<Action> actions;
 
@@ -21,8 +18,8 @@ public class BotActionService {
         this.plugin = plugin;
         this.config = new BotActionSettings(plugin);
         this.actions = Set.of(
-                new LoginAction(plugin, config),
-                new VoteAction(plugin, config)
+                new LoginAction(plugin, this),
+                new VoteAction(plugin, this)
         );
     }
 
@@ -41,15 +38,14 @@ public class BotActionService {
     }
 
     public void stop() {
-        if (voteTask != null) {
-            voteTask.cancel();
-            voteTask = null;
-        }
-
         actions.forEach(Action::stop);
     }
 
     public void ensureMinimum() {
         actions.forEach(Action::ensureMinimum);
+    }
+
+    public BotActionSettings getConfig() {
+        return config;
     }
 }

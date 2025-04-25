@@ -5,6 +5,7 @@ import me.seetaadev.serverfiller.bot.connection.ConnectionFactory;
 import me.seetaadev.serverfiller.bot.responses.ai.AIChatResponder;
 import me.seetaadev.serverfiller.bot.service.BotConfigService;
 import me.seetaadev.serverfiller.bot.settings.BotSettings;
+import me.seetaadev.serverfiller.hooks.proxy.MessageType;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
 import net.minecraft.server.MinecraftServer;
@@ -79,12 +80,15 @@ public class Bot extends CraftPlayer {
 
                     if (!settings.hasPlayedBefore()) {
                         plugin.getHookManager().giveRank(getName(), settings.getRank());
+                        plugin.getHookManager().createData(this);
                         settings.changePlayedBefore(true);
+                        configService.save(settings);
                     }
 
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         Location target = new Location(Bukkit.getWorld("world"), -410, 32, 313);
                         teleport(target);
+                        plugin.getHookManager().sendProxyMessage(this, MessageType.JOIN);
                     }, 120L);
                 });
             });
@@ -99,6 +103,7 @@ public class Bot extends CraftPlayer {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             getHandle().connection.disconnect(Component.text("Disconnected"), PlayerKickEvent.Cause.PLUGIN);
             this.spawned = false;
+            plugin.getHookManager().sendProxyMessage(this, MessageType.LEAVE);
         }, 1L);
     }
 

@@ -15,6 +15,7 @@ bots:
     votingEnabled: true
     skinsEnabled: true
     chatEnabled: true
+    proxyEnabled: false
 
 chat:
     welcome:

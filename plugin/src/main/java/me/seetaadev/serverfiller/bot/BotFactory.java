@@ -40,6 +40,7 @@ public class BotFactory {
         double chatWelcomeChance = config.getDouble("chat.welcome.chance", 0.2);
         int welcomeMin = config.getInt("chat.welcome.min", 1);
         int welcomeMax = config.getInt("chat.welcome.max", 5);
+        boolean proxyEnabled = config.getBoolean("bots.proxyEnabled", false);
 
         botBuilder.setHostname(hostname);
         botBuilder.setPort(port);
@@ -49,6 +50,7 @@ public class BotFactory {
         botBuilder.setWelcomeChance(chatWelcomeChance);
         botBuilder.setWelcomeMin(welcomeMin);
         botBuilder.setWelcomeMax(welcomeMax);
+        botBuilder.setProxyEnabled(proxyEnabled);
 
         File botsFolder = new File(plugin.getDataFolder(), "bots");
         if (!botsFolder.exists() && !botsFolder.mkdirs()) {

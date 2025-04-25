@@ -3,7 +3,7 @@ package me.seetaadev.serverfiller.bot.service.actions;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
 import me.seetaadev.serverfiller.bot.BotFactory;
-import me.seetaadev.serverfiller.bot.settings.BotActionSettings;
+import me.seetaadev.serverfiller.bot.service.BotActionService;
 import me.seetaadev.serverfiller.hooks.HookManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -12,19 +12,19 @@ public class VoteAction implements Action {
     private BukkitRunnable voteTask;
     private final ServerFillerPlugin plugin;
     private final BotFactory botFactory;
-    private final BotActionSettings config;
+    private final BotActionService botActionService;
     private final HookManager hook;
 
-    public VoteAction(ServerFillerPlugin plugin, BotActionSettings config) {
+    public VoteAction(ServerFillerPlugin plugin, BotActionService botActionService) {
         this.plugin = plugin;
         this.botFactory = plugin.getBotFactory();
-        this.config = config;
+        this.botActionService = botActionService;
         this.hook = plugin.getHookManager();
     }
 
     @Override
     public void start() {
-        if (config.isVotingEnabled()) {
+        if (botActionService.getConfig().isVotingEnabled()) {
             return;
         }
 
@@ -39,7 +39,8 @@ public class VoteAction implements Action {
                 start();
             }
         };
-        voteTask.runTaskLater(plugin, getRandomDelayTicks(config.getMinTimeBetweenVotes(), config.getMaxTimeBetweenVotes()));
+        voteTask.runTaskLater(plugin, getRandomDelayTicks(botActionService.getConfig().getMinTimeBetweenVotes(),
+                botActionService.getConfig().getMaxTimeBetweenVotes()));
     }
 
     @Override

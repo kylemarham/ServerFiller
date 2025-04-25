@@ -4,8 +4,12 @@ import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
 import me.seetaadev.serverfiller.hooks.discordsrv.DiscordSRVHook;
 import me.seetaadev.serverfiller.hooks.luckperms.LuckPermsHook;
+import me.seetaadev.serverfiller.hooks.mmoitems.MMOItemsHook;
+import me.seetaadev.serverfiller.hooks.proxy.MessageType;
+import me.seetaadev.serverfiller.hooks.proxy.ProxyHook;
 import me.seetaadev.serverfiller.hooks.voting.VotingHook;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 public class HookManager {
 
@@ -13,6 +17,8 @@ public class HookManager {
     private DiscordSRVHook discordSRVHook = null;
     private LuckPermsHook luckPermsHook = null;
     private VotingHook votingHook = null;
+    private MMOItemsHook mmoItemsHook = null;
+    private ProxyHook proxyHook = null;
 
     public HookManager(ServerFillerPlugin plugin) {
         this.plugin = plugin;
@@ -33,6 +39,16 @@ public class HookManager {
             votingHook = new VotingHook(plugin);
             plugin.getComponentLogger().info("VotingPlugin Hook enabled");
         }
+
+        if (Bukkit.getPluginManager().isPluginEnabled("MMOItems")) {
+            mmoItemsHook = new MMOItemsHook();
+            plugin.getComponentLogger().info("MMOItems Hook enabled");
+        }
+
+        if (plugin.getBotFactory().botBuilder().isProxyEnabled()) {
+            proxyHook = new ProxyHook(plugin);
+            plugin.getComponentLogger().info("Proxy Hook enabled");
+        }
     }
 
     public void sendDiscordMessage(String message, Bot bot) {
@@ -49,5 +65,17 @@ public class HookManager {
 
     public void vote(Bot bot) {
         votingHook.vote(bot);
+    }
+
+    public void createData(Bot bot) {
+        if (mmoItemsHook != null) {
+            mmoItemsHook.createData(bot);
+        }
+    }
+
+    public void sendProxyMessage(Player player, MessageType messageType) {
+        if (proxyHook != null) {
+            proxyHook.sendMessageToProxy(player, messageType);
+        }
     }
 }
