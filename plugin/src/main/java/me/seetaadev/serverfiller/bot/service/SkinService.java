@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
+import me.seetaadev.serverfiller.bot.cache.SkinCache;
 import org.bukkit.Bukkit;
 
 import java.io.InputStreamReader;
@@ -20,24 +21,45 @@ import java.util.Map;
 public class SkinService {
 
     private final ServerFillerPlugin plugin;
+    private final SkinCache cache;
 
     public SkinService(ServerFillerPlugin plugin) {
         this.plugin = plugin;
+        this.cache = new SkinCache();
     }
 
     public void loadSkin(GameProfile profile, String playerName) {
         plugin.getBotExecutor().submit(() -> {
             try {
-                String uuid = getUUID(playerName);
-                Property skin = (uuid != null) ? getSkinFromMojang(uuid) : null;
-
-                if (skin == null) skin = getSkinFromCrafatar(playerName);
-                if (skin == null) {
-                    plugin.getComponentLogger().warn("No skin found for '{}'", playerName);
+                Property cached = cache.getByName(playerName);
+                if (cached != null) {
+                    applySkin(profile, cached);
                     return;
                 }
 
-                applySkin(profile, skin);
+                String uuid = getUUID(playerName);
+                Property skin = null;
+
+                if (uuid != null) {
+                    skin = cache.getByUUID(uuid);
+                    if (skin == null) {
+                        skin = getSkinFromMojang(uuid);
+                        if (skin != null) {
+                            cache.putByUUID(uuid, skin);
+                        }
+                    }
+                }
+
+                if (skin == null) {
+                    skin = getSkinFromCrafatar(playerName);
+                }
+
+                if (skin != null) {
+                    cache.putByName(playerName, skin);
+                    applySkin(profile, skin);
+                } else {
+                    plugin.getComponentLogger().warn("No skin found for '{}'", playerName);
+                }
 
             } catch (Exception e) {
                 plugin.getComponentLogger().warn("Error loading skin for '{}': {}", playerName, e.getMessage());
