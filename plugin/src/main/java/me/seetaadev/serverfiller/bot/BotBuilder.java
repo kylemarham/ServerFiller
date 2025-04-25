@@ -12,7 +12,6 @@ import org.bukkit.craftbukkit.CraftWorld;
 
 public class BotBuilder {
 
-
     private String hostname;
     private int port;
     private boolean skinsEnabled;
