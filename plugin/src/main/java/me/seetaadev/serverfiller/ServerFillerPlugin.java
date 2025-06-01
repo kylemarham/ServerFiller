@@ -75,6 +75,7 @@ public class ServerFillerPlugin extends JavaPlugin {
             botExecutor.shutdownNow();
         }
 
+        hookManager.stop();
         botActionService.stop();
     }
 

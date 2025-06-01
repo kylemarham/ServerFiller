@@ -24,9 +24,7 @@ public class VoteAction implements Action {
 
     @Override
     public void start() {
-        if (botActionService.getConfig().isVotingEnabled()) {
-            return;
-        }
+        if (!botActionService.getConfig().isVotingEnabled()) return;
 
         voteTask = new BukkitRunnable() {
             @Override

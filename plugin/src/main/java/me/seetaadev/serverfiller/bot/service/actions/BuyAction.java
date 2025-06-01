@@ -4,50 +4,60 @@ import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
 import me.seetaadev.serverfiller.bot.BotFactory;
 import me.seetaadev.serverfiller.bot.service.BotActionService;
-import me.seetaadev.serverfiller.hooks.HookManager;
+import me.seetaadev.serverfiller.bot.settings.ItemSettings;
+import net.kyori.adventure.text.Component;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.List;
+import java.util.Map;
 
 public class BuyAction implements Action {
 
-    private BukkitRunnable voteTask;
+    private BukkitRunnable buyTask;
     private final ServerFillerPlugin plugin;
     private final BotFactory botFactory;
     private final BotActionService botActionService;
-    private final HookManager hook;
 
     public BuyAction(ServerFillerPlugin plugin, BotActionService botActionService) {
         this.plugin = plugin;
         this.botFactory = plugin.getBotFactory();
         this.botActionService = botActionService;
-        this.hook = plugin.getHookManager();
     }
 
     @Override
     public void start() {
-        if (botActionService.getConfig().isB) {
-            return;
-        }
+        if (!botActionService.getConfig().isBuyMessageEnabled()) return;
 
-        voteTask = new BukkitRunnable() {
+        buyTask = new BukkitRunnable() {
             @Override
             public void run() {
                 Bot bot = botFactory.randomOnlineBot(false);
                 if (bot != null) {
-                    hook.vote(bot);
+                    sendMessage(bot);
                 }
 
                 start();
             }
         };
-        voteTask.runTaskLater(plugin, getRandomDelayTicks(botActionService.getConfig().getMinTimeBetweenVotes(),
-                botActionService.getConfig().getMaxTimeBetweenVotes()));
+        buyTask.runTaskLater(plugin, getRandomDelayTicks(botActionService.getConfig().getMinBuyMessageInterval(),
+                botActionService.getConfig().getMaxBuyMessageInterval()));
+    }
+
+    public void sendMessage(Bot bot) {
+        ItemSettings.BuyItem buyItem = botActionService.getItemSettings().randomBuyItem();
+        if (buyItem == null) return;
+
+        List<Component> messages = plugin.getMessageHandler().formatList("buy", Map.of("{player_name}", bot.getName(),
+                "{item_name}", buyItem.itemName()));
+
+        messages.forEach(bot::sendMessage);
     }
 
     @Override
     public void stop() {
-        if (voteTask != null) {
-            voteTask.cancel();
-            voteTask = null;
+        if (buyTask != null) {
+            buyTask.cancel();
+            buyTask = null;
         }
     }
 }
