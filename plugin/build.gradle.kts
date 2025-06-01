@@ -9,7 +9,7 @@ plugins {
 
 tasks {
     shadowJar {
-        archiveBaseName.set(rootProject.name)
+        archiveBaseName.set(rootProject.name + "-Bukkit")
         archiveClassifier.set("")
     }
 
@@ -28,6 +28,8 @@ dependencies {
     compileOnly("net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("org.json:json:20230618")
+    implementation("io.lettuce:lettuce-core:6.6.0.RELEASE")
+    implementation(project(":common"))
 }
 
 bukkit {

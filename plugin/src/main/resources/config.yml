@@ -60,3 +60,7 @@ messages:
         first_message:
             - "&fWelcome {player_name} to the server!"
             - "&fHello {player_name}, enjoy your stay!"
+    buy:
+        - "&f"
+        - "&fThe player {player_name} has purchased the package {package_name}"
+        - "&f"

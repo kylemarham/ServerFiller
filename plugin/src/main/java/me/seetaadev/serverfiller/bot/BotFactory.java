@@ -154,6 +154,10 @@ public class BotFactory {
         return bots.get(random.nextInt(bots.size()));
     }
 
+    public int onlineBotsSize() {
+        return botStorageService.onlineBots().size();
+    }
+
     public List<Bot> getOnlineBots() {
         return botStorageService.onlineBots();
     }

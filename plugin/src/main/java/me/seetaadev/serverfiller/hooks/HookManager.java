@@ -1,15 +1,14 @@
 package me.seetaadev.serverfiller.hooks;
 
+import me.seetaadev.serverfiller.RedisMessage;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.Bot;
 import me.seetaadev.serverfiller.hooks.discordsrv.DiscordSRVHook;
 import me.seetaadev.serverfiller.hooks.luckperms.LuckPermsHook;
 import me.seetaadev.serverfiller.hooks.mmoitems.MMOItemsHook;
-import me.seetaadev.serverfiller.hooks.proxy.MessageType;
 import me.seetaadev.serverfiller.hooks.proxy.ProxyHook;
 import me.seetaadev.serverfiller.hooks.voting.VotingHook;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 public class HookManager {
 
@@ -47,7 +46,16 @@ public class HookManager {
 
         if (plugin.getBotFactory().botBuilder().isProxyEnabled()) {
             proxyHook = new ProxyHook(plugin);
+            proxyHook.connect();
             plugin.getComponentLogger().info("Proxy Hook enabled");
+        }
+    }
+
+    public void stop() {
+        if (plugin.getBotFactory().botBuilder().isProxyEnabled()) {
+            if (proxyHook != null) {
+                proxyHook.disconnect();
+            }
         }
     }
 
@@ -73,9 +81,9 @@ public class HookManager {
         }
     }
 
-    public void sendProxyMessage(Player player, MessageType messageType) {
+    public void sendProxyMessage(RedisMessage message) {
         if (proxyHook != null) {
-            proxyHook.sendMessageToProxy(player, messageType);
+            proxyHook.sendMessageToProxy(message);
         }
     }
 }

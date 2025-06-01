@@ -5,7 +5,7 @@ plugins {
 
 tasks {
     shadowJar {
-        archiveBaseName.set(rootProject.name)
+        archiveBaseName.set(rootProject.name + "-Velocity")
         archiveClassifier.set("")
     }
 
@@ -17,4 +17,6 @@ tasks {
 dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
+    implementation("io.lettuce:lettuce-core:6.6.0.RELEASE")
+    implementation(project(":common"))
 }
