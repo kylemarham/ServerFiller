@@ -53,6 +53,9 @@ public class HookManager {
 
     public void stop() {
         if (plugin.getBotFactory().botBuilder().isProxyEnabled()) {
+            //int onlineBots = plugin.getBotFactory().onlineBotsCount();
+            //if (onlineBots > 0)
+
             if (proxyHook != null) {
                 proxyHook.disconnect();
             }

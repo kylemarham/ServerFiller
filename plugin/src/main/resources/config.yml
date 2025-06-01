@@ -38,7 +38,6 @@ openai:
     maxDelay: 60 # in seconds
 
 messages:
-    enabled: true
     reload: "&cReload config"
     join: "&a&l→ &r&a{bot_name}"
     firstJoin: "&e{bot_name} joined Wavecraft for the first time!"

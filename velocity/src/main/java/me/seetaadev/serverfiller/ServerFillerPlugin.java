@@ -17,6 +17,8 @@ import me.seetaadev.serverfiller.redis.RedisConnector;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 
 
@@ -50,11 +52,11 @@ public class ServerFillerPlugin {
 
         redisConnector = new RedisConnector(this);
         Toml toml = new Toml().read(redisFile);
-        String host = toml.getString("redis.host", "localhost");
-        int port = toml.getLong("redis.port", 6379L).intValue();
-        int timeout = toml.getLong("redis.timeout", 10L).intValue();
-        String username = toml.getString("redis.username", "");
-        String password = toml.getString("redis.password", "");
+        String host = toml.getString("hostname", "localhost");
+        int port = toml.getLong("port", 6379L).intValue();
+        int timeout = toml.getLong("timeout", 10L).intValue();
+        String username = toml.getString("username", "");
+        String password = toml.getString("password", "");
         if (username == null || username.isEmpty()) username = null;
         if (password == null || password.isEmpty()) password = null;
 
@@ -72,17 +74,36 @@ public class ServerFillerPlugin {
     }
 
     public void generateConfig() {
+        File mainDirectory = dataDirectory.toFile();
+        if (!mainDirectory.exists() && !mainDirectory.mkdirs()) {
+            logger.error("Failed to create data directory: {}", mainDirectory.getAbsolutePath());
+            return;
+        }
+
         redisFile = new File(dataDirectory.toFile(), "redis.toml");
+
         if (!redisFile.exists()) {
             try {
                 if (redisFile.createNewFile()) {
-                    logger.info("Created config file at: {}", redisFile.getAbsolutePath());
+                    String defaultConfig = """
+                    hostname = "localhost"
+                    port = 6379
+                    timeout = 10
+                    username = ""
+                    password = ""
+                """;
+                    try (FileWriter writer = new FileWriter(redisFile)) {
+                        writer.write(defaultConfig);
+                        logger.info("Config file created and default content written to: {}", redisFile.getAbsolutePath());
+                    }
                 } else {
                     logger.error("Failed to create config file at: {}", redisFile.getAbsolutePath());
                 }
-            } catch (Exception e) {
-                logger.error("Error creating config file", e);
+            } catch (IOException e) {
+                logger.error("Error creating or writing to the config file", e);
             }
+        } else {
+            logger.info("Config file already exists, skipping creation.");
         }
     }
 

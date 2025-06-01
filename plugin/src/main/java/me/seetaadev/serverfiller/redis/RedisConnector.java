@@ -30,21 +30,21 @@ public class RedisConnector {
         this.logger = plugin.getComponentLogger();
     }
 
-    public boolean connect() {
+    public void connect() {
         RedisURI.Builder redisURI = RedisURI.builder();
 
         FileConfiguration config = new ConfigFile(plugin, null, "redis", true).getConfig();
         boolean auth;
-        redisURI.withHost(config.getString("redis.host"));
-        redisURI.withPort(config.getInt("redis.port"));
+        redisURI.withHost(config.getString("hostname"));
+        redisURI.withPort(config.getInt("port"));
 
-        redisURI.withTimeout(Duration.ofSeconds(config.getInt("redis.timeout")));
-        if (config.getString("redis.username") != null && !Objects.requireNonNull(config.getString("redis.username")).isEmpty()) {
-            redisURI.withClientName(config.getString("redis.username"));
+        redisURI.withTimeout(Duration.ofSeconds(config.getInt("timeout")));
+        if (config.getString("username") != null && !Objects.requireNonNull(config.getString("username")).isEmpty()) {
+            redisURI.withClientName(config.getString("username"));
         }
 
-        if (config.getString("redis.password") != null && !Objects.requireNonNull(config.getString("redis.password")).isEmpty()) {
-            CharSequence password = config.getString("redis.password");
+        if (config.getString("password") != null && !Objects.requireNonNull(config.getString("password")).isEmpty()) {
+            CharSequence password = config.getString("password");
             redisURI.withPassword(password);
 
             auth = true;
@@ -65,11 +65,9 @@ public class RedisConnector {
             });
 
             logger.info("Connected to Redis {} auth", auth ? "with" : "without");
-            return true;
         } catch (Exception e) {
             logger.error("Failed to connect to Redis");
             Bukkit.getPluginManager().disablePlugin(plugin);
-            return false;
         }
     }
 
