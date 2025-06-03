@@ -1,6 +1,7 @@
 package me.seetaadev.serverfiller.bot.service;
 
 import me.seetaadev.serverfiller.ServerFillerPlugin;
+import me.seetaadev.serverfiller.config.ConfigFile;
 
 import java.util.List;
 
@@ -10,14 +11,14 @@ public class BotMessageService {
     private boolean enabled;
     private Double chance;
 
-
     public BotMessageService(ServerFillerPlugin plugin) {
         this.plugin = plugin;
     }
 
     public void load() {
-        enabled = plugin.getConfig().getBoolean("chat.welcome.enabled", true);
-        chance = plugin.getConfig().getDouble("chat.welcome.chance", 0.5);
+        ConfigFile config = new ConfigFile(plugin, null, "config", true);
+        enabled = config.getConfig().getBoolean("chat.welcome.enabled", true);
+        chance = config.getConfig().getDouble("chat.welcome.chance", 0.5);
     }
 
     public void reload() {

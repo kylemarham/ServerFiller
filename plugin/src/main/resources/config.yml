@@ -10,10 +10,16 @@ bots:
         min: 120 # in seconds
         max: 1600 # in seconds
     timeVotes:
+        enabled: true
         min: 300
         max: 900
-    votingEnabled: true
+    buyMessage:
+        enabled: true
+        min: 60 # in seconds
+        max: 300 # in seconds
     skinsEnabled: true
+    chatEnabled: true
+    proxyEnabled: false
 
 chat:
     welcome:
@@ -32,7 +38,6 @@ openai:
     maxDelay: 60 # in seconds
 
 messages:
-    enabled: true
     reload: "&cReload config"
     join: "&a&l→ &r&a{bot_name}"
     firstJoin: "&e{bot_name} joined Wavecraft for the first time!"
@@ -58,3 +63,7 @@ messages:
         first_message:
             - "&fWelcome {player_name} to the server!"
             - "&fHello {player_name}, enjoy your stay!"
+    buy:
+        - "&f"
+        - "&fThe player {player_name} has purchased the item {item_name}"
+        - "&f"

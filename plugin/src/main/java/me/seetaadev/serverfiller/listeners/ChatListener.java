@@ -27,8 +27,6 @@ public class ChatListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncChatEvent event) {
-        boolean enabled = plugin.getConfig().getBoolean("messages.enabled", true);
-
         Player player = event.getPlayer();
         String message = getOriginalMessage(event.message());
 
@@ -40,9 +38,7 @@ public class ChatListener implements Listener {
 //        event.setCancelled(true);
 //        plugin.getServer().broadcast(formattedMessage);
 
-        if(enabled) {
-            chatResponder.sendResponse(message, player);
-        }
+        chatResponder.sendResponse(message, player);
     }
 
     public String getOriginalMessage(Component message) {

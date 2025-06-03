@@ -1,5 +1,7 @@
 package me.seetaadev.serverfiller.bot;
 
+import me.seetaadev.serverfiller.Payload;
+import me.seetaadev.serverfiller.RedisMessage;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.connection.ConnectionFactory;
 import me.seetaadev.serverfiller.bot.responses.ai.AIChatResponder;
@@ -53,10 +55,6 @@ public class Bot extends CraftPlayer {
         this.processingResponse = false;
     }
 
-    public int calculateLatency() {
-        return ThreadLocalRandom.current().nextInt(10, 200);
-    }
-
     public void spawn() {
         if (spawned || existsPlayerWithName(settings.getName())) {
             return;
@@ -81,26 +79,21 @@ public class Bot extends CraftPlayer {
                     Bot.SERVER.getPlayerList().sendAllPlayerInfo(getHandle());
                     spawned = true;
 
-                    if (!hasPlayedBefore()) {
-                        giveRank();
+                    if (!settings.hasPlayedBefore()) {
+                        plugin.getHookManager().giveRank(getName(), settings.getRank());
+                        plugin.getHookManager().createData(this);
+                        settings.changePlayedBefore(true);
+                        configService.save(settings);
                     }
 
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         Location target = new Location(Bukkit.getWorld("world"), -410, 32, 313);
                         teleport(target);
+                        plugin.getHookManager().sendProxyMessage(new RedisMessage(Payload.ADD));
                     }, 120L);
                 });
             });
         }, 1L);
-    }
-
-    public boolean existsPlayerWithName(String name) {
-        return Bukkit.getPlayer(name) != null;
-    }
-
-    public void giveRank() {
-        String command = "lp user " + getName() + " parent set " + settings.getRank();
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 
     public void despawn() {
@@ -111,12 +104,29 @@ public class Bot extends CraftPlayer {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             getHandle().connection.disconnect(Component.text("Disconnected"), PlayerKickEvent.Cause.PLUGIN);
             this.spawned = false;
+            plugin.getHookManager().sendProxyMessage(new RedisMessage(Payload.REMOVE));
         }, 1L);
     }
 
     public Bot saveBot() {
         configService.save(settings);
         return this;
+    }
+
+    public int calculateLatency() {
+        return ThreadLocalRandom.current().nextInt(10, 200);
+    }
+
+    public void startCooldown() {
+        this.inCooldown = true;
+        AIChatResponder AIChatResponder = plugin.getChatResponder().getAIChatResponder();
+        int delaySeconds = ThreadLocalRandom.current().nextInt(AIChatResponder.getMinDelay(), AIChatResponder.getMaxDelay() + 1);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> this.inCooldown = false, 20L * delaySeconds);
+    }
+
+    public boolean existsPlayerWithName(String name) {
+        return Bukkit.getPlayer(name) != null;
     }
 
     public boolean isSpawned() {
@@ -133,14 +143,6 @@ public class Bot extends CraftPlayer {
 
     public BotSettings getSettings() {
         return settings;
-    }
-
-    public void startCooldown() {
-        this.inCooldown = true;
-        AIChatResponder AIChatResponder = plugin.getChatResponder().getAIChatResponder();
-        int delaySeconds = ThreadLocalRandom.current().nextInt(AIChatResponder.getMinDelay(), AIChatResponder.getMaxDelay() + 1);
-
-        Bukkit.getScheduler().runTaskLater(plugin, () -> this.inCooldown = false, 20L * delaySeconds);
     }
 
     public boolean isInCooldown() {

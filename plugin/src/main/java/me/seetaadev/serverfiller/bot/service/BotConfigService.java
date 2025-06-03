@@ -15,6 +15,7 @@ public class BotConfigService {
         configFile.getConfig().set("rank", settings.getRank());
         configFile.getConfig().set("uuid", settings.getUUID().toString());
         configFile.getConfig().set("skillLevel", settings.getSkillLevel());
+        configFile.getConfig().set("hasPlayedBefore", settings.hasPlayedBefore());
         configFile.save();
     }
 }

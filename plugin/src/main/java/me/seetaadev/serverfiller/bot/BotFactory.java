@@ -26,7 +26,7 @@ public class BotFactory {
         this.plugin = plugin;
         this.configLoader = new BotConfigLoader(plugin);
         this.botStorageService = new BotStorageService();
-        this.botBuilder = new BotBuilder();
+        this.botBuilder = new BotBuilder(plugin);
     }
 
     public void load() {
@@ -34,10 +34,23 @@ public class BotFactory {
         FileConfiguration config = configFile.getConfig();
         String hostname = config.getString("host.name", "localhost");
         int port = config.getInt("host.port", 25565);
+        boolean skinsEnabled = config.getBoolean("bots.skinsEnabled", true);
+        boolean shouldWeWelcomeBots = config.getBoolean("chat.botWelcomeEnabled", true);
+        boolean chatWelcomeEnabled = config.getBoolean("chat.welcome.enabled", true);
+        double chatWelcomeChance = config.getDouble("chat.welcome.chance", 0.2);
+        int welcomeMin = config.getInt("chat.welcome.min", 1);
+        int welcomeMax = config.getInt("chat.welcome.max", 5);
+        boolean proxyEnabled = config.getBoolean("bots.proxyEnabled", false);
 
-        botBuilder.setPlugin(plugin);
         botBuilder.setHostname(hostname);
         botBuilder.setPort(port);
+        botBuilder.setSkinsEnabled(skinsEnabled);
+        botBuilder.setShouldWeWelcomeBots(shouldWeWelcomeBots);
+        botBuilder.setChatWelcomeEnabled(chatWelcomeEnabled);
+        botBuilder.setWelcomeChance(chatWelcomeChance);
+        botBuilder.setWelcomeMin(welcomeMin);
+        botBuilder.setWelcomeMax(welcomeMax);
+        botBuilder.setProxyEnabled(proxyEnabled);
 
         File botsFolder = new File(plugin.getDataFolder(), "bots");
         if (!botsFolder.exists() && !botsFolder.mkdirs()) {
@@ -68,6 +81,7 @@ public class BotFactory {
             FileConfiguration botConfig = botConfigFile.getConfig();
             botConfig.set("rank", rank);
             botConfig.set("skillLevel", skillLevel);
+            botConfig.set("hasPlayedBefore", false);
             botConfigFile.save();
         }
 
@@ -140,6 +154,10 @@ public class BotFactory {
         return bots.get(random.nextInt(bots.size()));
     }
 
+    public int onlineBotsSize() {
+        return botStorageService.onlineBots().size();
+    }
+
     public List<Bot> getOnlineBots() {
         return botStorageService.onlineBots();
     }
@@ -156,6 +174,10 @@ public class BotFactory {
         Bot bot = botBuilder.createBot(settings);
         botStorageService.addBot(bot);
         return bot;
+    }
+
+    public BotBuilder botBuilder() {
+        return botBuilder;
     }
 }
 
