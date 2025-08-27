@@ -4,7 +4,7 @@ plugins {
     id("project.common-conventions")
     id("net.minecrell.plugin-yml.bukkit") version "0.5.1"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.16"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.18"
 }
 
 tasks {
@@ -19,7 +19,7 @@ tasks {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("com.bencodez:votingplugin:6.18.3")
