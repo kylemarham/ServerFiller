@@ -4,6 +4,7 @@ import me.seetaadev.serverfiller.Payload;
 import me.seetaadev.serverfiller.RedisMessage;
 import me.seetaadev.serverfiller.ServerFillerPlugin;
 import me.seetaadev.serverfiller.bot.connection.ConnectionFactory;
+import me.seetaadev.serverfiller.bot.cookie.BotCookieFactory;
 import me.seetaadev.serverfiller.bot.responses.ai.AIChatResponder;
 import me.seetaadev.serverfiller.bot.service.BotConfigService;
 import me.seetaadev.serverfiller.bot.settings.BotSettings;
@@ -47,7 +48,7 @@ public class Bot extends CraftPlayer {
         this.port = port;
         this.plugin = plugin;
         this.connection = new ConnectionFactory(hostname, port).createConnection(getName(), getUniqueId());
-        CommonListenerCookie cookie = new CommonListenerCookie(entityPlayer.getGameProfile(), calculateLatency(), CLIENT_INFORMATION, false);
+        CommonListenerCookie cookie = BotCookieFactory.make(entityPlayer.getGameProfile(), calculateLatency(), CLIENT_INFORMATION);
         entityPlayer.connection = new ServerGamePacketListenerImpl(SERVER, connection, entityPlayer, cookie);
         this.configService = new BotConfigService(plugin, settings);
         this.spawned = false;
@@ -63,8 +64,8 @@ public class Bot extends CraftPlayer {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (!getHandle().connection.connection.isConnected()) {
                 this.connection = new ConnectionFactory(hostname, port).createConnection(getName(), getUniqueId());
-                CommonListenerCookie cookie = new CommonListenerCookie(getHandle().getGameProfile(), calculateLatency(), Bot.CLIENT_INFORMATION, false);
-                ServerPlayer newServerPlayer = new ServerPlayer(Bot.SERVER, getHandle().serverLevel().getLevel(), getHandle().getGameProfile(), Bot.CLIENT_INFORMATION);
+                CommonListenerCookie cookie = BotCookieFactory.make(getHandle().getGameProfile(), calculateLatency(), CLIENT_INFORMATION);
+                ServerPlayer newServerPlayer = new ServerPlayer(Bot.SERVER, getHandle().level(), getHandle().getGameProfile(), Bot.CLIENT_INFORMATION);
                 newServerPlayer.connection = new ServerGamePacketListenerImpl(Bot.SERVER, connection, getHandle(), cookie);
                 this.entity = newServerPlayer;
             }
@@ -75,7 +76,7 @@ public class Bot extends CraftPlayer {
                 Bukkit.getPluginManager().callEvent(event);
 
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    Bot.SERVER.getPlayerList().placeNewPlayer(connection, getHandle(), new CommonListenerCookie(getProfile(), calculateLatency(), Bot.CLIENT_INFORMATION, false));
+                    Bot.SERVER.getPlayerList().placeNewPlayer(connection, getHandle(), BotCookieFactory.make(getProfile(), calculateLatency(), Bot.CLIENT_INFORMATION));
                     Bot.SERVER.getPlayerList().sendAllPlayerInfo(getHandle());
                     spawned = true;
 

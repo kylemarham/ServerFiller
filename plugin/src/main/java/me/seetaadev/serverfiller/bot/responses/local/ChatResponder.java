@@ -153,7 +153,8 @@ public class ChatResponder {
         Component botResponse = messageHandler.format(botFormat);
         Bukkit.broadcast(botResponse);
         bot.processResponse();
-        hook.sendDiscordMessage(replyText, bot);
+        if (hook != null)
+            hook.sendDiscordMessage(replyText, bot);
     }
 
 
